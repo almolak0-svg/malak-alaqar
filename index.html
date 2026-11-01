@@ -270,11 +270,11 @@ details.report summary{min-height:44px;display:flex;align-items:center;color:var
   <div class="brandhead">
     <img src="logo.jpg" alt="ملاك العقار">
     <h1>أهلاً بك</h1>
-    <p>سجّل دخولك لتتواصل مع الملاك أو تعرض عقارك.</p>
+    <p>سجّل دخولك برقم جوالك لتتواصل مع الملاك أو تعرض عقارك.</p>
   </div>
   <form id="loginForm" novalidate>
     <div class="msg" id="loginMsg" role="alert"></div>
-    <label class="f">البريد الإلكتروني<input id="loginEmail" type="email" autocomplete="email" placeholder="name@example.com" required></label>
+    <label class="f">رقم الجوال<input id="loginEmail" type="text" inputmode="tel" autocomplete="username" placeholder="05xxxxxxxx" required><small>إذا سجّلت سابقاً بالبريد الإلكتروني، اكتبه هنا.</small></label>
     <label class="f">كلمة المرور<input id="loginPass" type="password" autocomplete="current-password" placeholder="••••••••" required></label>
     <button type="button" class="link" id="forgotBtn">نسيت كلمة المرور؟</button>
     <button type="submit" class="primary" id="loginSubmit">دخول</button>
@@ -301,9 +301,8 @@ details.report summary{min-height:44px;display:flex;align-items:center;color:var
       <label class="opt"><input type="radio" name="role" value="both"><span><b>الاثنين</b><span>تقدر تغيّرها لاحقاً من حسابك.</span></span></label>
     </fieldset>
     <label class="f">الاسم<input id="suName" type="text" autocomplete="name" placeholder="الاسم الأول واسم العائلة" required></label>
-    <label class="f">رقم الجوال<input id="suPhone" type="tel" inputmode="numeric" autocomplete="tel" placeholder="05xxxxxxxx" required><small>ما يظهر لأحد إلا بعد موافقتك ودفع رسوم الخدمة.</small></label>
-    <label class="f">البريد الإلكتروني<input id="suEmail" type="email" autocomplete="email" placeholder="name@example.com" required></label>
-    <label class="f">كلمة المرور<input id="suPass" type="password" autocomplete="new-password" placeholder="8 أحرف على الأقل" required></label>
+    <label class="f">رقم الجوال<input id="suPhone" type="tel" inputmode="numeric" autocomplete="username" placeholder="05xxxxxxxx" required><small>تدخل فيه للتطبيق، وما يظهر لأحد إلا بعد موافقتك ودفع رسوم الخدمة.</small></label>
+    <label class="f">كلمة المرور<input id="suPass" type="password" autocomplete="new-password" placeholder="6 أحرف أو أرقام على الأقل" required><small>احفظها، لأنك بتحتاجها كل مرة تدخل.</small></label>
     <label class="check"><input id="suTerms" type="checkbox"><span>أوافق على <a href="#terms">شروط الاستخدام</a> و<a href="#privacy">سياسة الخصوصية</a>.</span></label>
     <button type="submit" class="primary" id="signupSubmit">إنشاء الحساب</button>
     <p class="center muted">عندك حساب؟ <a class="link" href="#login">سجّل دخولك</a></p>
@@ -502,7 +501,7 @@ details.report summary{min-height:44px;display:flex;align-items:center;color:var
     <form id="acForm" novalidate style="margin:0">
       <div class="msg" id="acMsg" role="alert"></div>
       <label class="f">الاسم<input id="acNameIn" type="text" autocomplete="name"></label>
-      <label class="f">رقم الجوال<input id="acPhone" type="tel" inputmode="numeric"><small>ما يظهر لأحد إلا بعد موافقتك ودفع رسوم الخدمة.</small></label>
+      <label class="f">جوال التواصل<input id="acPhone" type="tel" inputmode="numeric"><small>الرقم اللي ينكشف لمن يدفع رسوم الخدمة. رقم الدخول نفسه ما يتغيّر.</small></label>
       <fieldset><legend>نوع الحساب</legend>
         <label class="opt"><input type="radio" name="acrole" value="buyer"><span><b>أبحث عن عقار</b></span></label>
         <label class="opt"><input type="radio" name="acrole" value="owner"><span><b>عندي عقار أعرضه</b></span></label>
@@ -512,7 +511,12 @@ details.report summary{min-height:44px;display:flex;align-items:center;color:var
     </form>
     <div class="menu">
       <a href="#admin" id="acAdmin" hidden>لوحة الإدارة <span class="badge" id="adminBadge" hidden>0</span></a>
-      <button type="button" id="acPass">تغيير كلمة المرور</button>
+      <details id="acPassBox" style="border-bottom:1px solid var(--line)"><summary style="min-height:52px;display:flex;align-items:center;padding:0 16px;cursor:pointer;font-size:15px">تغيير كلمة المرور</summary>
+        <div style="display:flex;flex-direction:column;gap:12px;padding:0 16px 16px">
+          <label class="f">كلمة المرور الحالية<input id="pwOld" type="password" autocomplete="current-password"></label>
+          <label class="f">كلمة المرور الجديدة<input id="pwNew" type="password" autocomplete="new-password" placeholder="6 أحرف أو أرقام على الأقل"></label>
+          <button type="button" class="primary" id="acPass">غيّر كلمة المرور</button>
+        </div></details>
       <a href="#terms">شروط الاستخدام</a>
       <a href="#privacy">سياسة الخصوصية</a>
       <a href="#refund">سياسة رسوم الخدمة والاسترداد</a>
@@ -568,7 +572,7 @@ details.report summary{min-height:44px;display:flex;align-items:center;color:var
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword,
-         updateProfile, sendPasswordResetEmail, signOut } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-auth.js";
+         updateProfile, sendPasswordResetEmail, signOut, reauthenticateWithCredential, updatePassword, EmailAuthProvider } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-auth.js";
 import { getFirestore, collection, query, where, orderBy, limit, getDocs, getDoc, doc, setDoc, updateDoc, deleteDoc, addDoc, onSnapshot, serverTimestamp, runTransaction, writeBatch }
          from "https://www.gstatic.com/firebasejs/13.1.0/firebase-firestore.js";
 
@@ -636,13 +640,21 @@ onAuthStateChanged(auth, (user) => {
   }
 });
 
+/* الدخول بالجوال: نحوّل الرقم لمعرّف داخلي بصيغة بريد، والمستخدم ما يشوفه */
+const PHONE_DOMAIN = "phone.malak-alaqar.app";
+const toDigits = (v) => String(v || "").replace(/[٠-٩]/g, d => "٠١٢٣٤٥٦٧٨٩".indexOf(d)).replace(/[^\d]/g, "");
+const normPhone = (v) => { let d = toDigits(v); if (d.startsWith("966")) d = "0" + d.slice(3); if (d.startsWith("5") && d.length === 9) d = "0" + d; return d; };
+const phoneLogin = (p) => `${normPhone(p)}@${PHONE_DOMAIN}`;
+const isPhoneAccount = (u) => (u?.email || "").endsWith("@" + PHONE_DOMAIN);
+const loginId = (v) => v.includes("@") ? v.trim() : phoneLogin(v);
 const errText = (code) => ({
   "auth/invalid-email":"صيغة البريد الإلكتروني غير صحيحة.",
-  "auth/invalid-credential":"البريد أو كلمة المرور غير صحيحة.",
-  "auth/wrong-password":"البريد أو كلمة المرور غير صحيحة.",
-  "auth/user-not-found":"ما فيه حساب بهذا البريد. أنشئ حساب جديد.",
-  "auth/email-already-in-use":"هذا البريد مسجّل من قبل. سجّل دخولك بدل إنشاء حساب.",
-  "auth/weak-password":"كلمة المرور ضعيفة. اكتب 8 أحرف على الأقل.",
+  "auth/invalid-credential":"رقم الجوال أو كلمة المرور غير صحيحة.",
+  "auth/wrong-password":"كلمة المرور غير صحيحة.",
+  "auth/user-not-found":"ما فيه حساب بهذا الرقم. أنشئ حساب جديد.",
+  "auth/email-already-in-use":"هذا الرقم مسجّل من قبل. سجّل دخولك بدل إنشاء حساب.",
+  "auth/weak-password":"كلمة المرور ضعيفة. اكتب 6 أحرف أو أرقام على الأقل.",
+  "auth/requires-recent-login":"لأمان حسابك، سجّل خروج ثم ادخل من جديد وكرر العملية.",
   "auth/too-many-requests":"محاولات كثيرة. انتظر شوي ثم جرّب مرة ثانية.",
   "auth/network-request-failed":"تأكد من اتصالك بالإنترنت ثم جرّب مرة ثانية."
 }[code] || "صار خطأ غير متوقع. جرّب مرة ثانية.");
@@ -652,14 +664,16 @@ $("loginForm").addEventListener("submit", async (e) => {
   e.preventDefault();
   const msg = $("loginMsg"), btn = $("loginSubmit");
   btn.disabled = true; btn.textContent = "جاري الدخول…";
-  try { await signInWithEmailAndPassword(auth, $("loginEmail").value.trim(), $("loginPass").value); }
+  const id = $("loginEmail").value.trim();
+  if (!id.includes("@") && !/^05\d{8}$/.test(normPhone(id))) { show(msg, "اكتب رقم جوالك بصيغة 05xxxxxxxx."); btn.disabled = false; btn.textContent = "دخول"; return; }
+  try { await signInWithEmailAndPassword(auth, loginId(id), $("loginPass").value); }
   catch(err){ show(msg, errText(err.code)); }
   btn.disabled = false; btn.textContent = "دخول";
 });
 
 $("forgotBtn").addEventListener("click", async () => {
   const msg = $("loginMsg"), email = $("loginEmail").value.trim();
-  if (!email) return show(msg, "اكتب بريدك الإلكتروني أولاً، ثم اضغط «نسيت كلمة المرور؟».");
+  if (!email.includes("@")) return show(msg, "إذا نسيت كلمة المرور، تواصل مع إدارة التطبيق وتُعاد لك. وقريباً بتقدر تسترجعها برمز يوصلك على جوالك.");
   try { await sendPasswordResetEmail(auth, email); show(msg, "أرسلنا لك رابط تغيير كلمة المرور على بريدك.", true); }
   catch(err){ show(msg, errText(err.code)); }
 });
@@ -668,19 +682,18 @@ $("signupForm").addEventListener("submit", async (e) => {
   e.preventDefault();
   const msg = $("signupMsg"), btn = $("signupSubmit");
   const name = $("suName").value.trim();
-  const phone = $("suPhone").value.replace(/\D/g,"");
-  const email = $("suEmail").value.trim();
+  const phone = normPhone($("suPhone").value);
   const pass = $("suPass").value;
   const role = document.querySelector('input[name="role"]:checked').value;
   if (name.length < 2) return show(msg, "اكتب اسمك.");
   if (!/^05\d{8}$/.test(phone)) return show(msg, "رقم الجوال لازم يبدأ بـ05 ويتكون من 10 أرقام.");
-  if (pass.length < 8) return show(msg, "كلمة المرور لازم تكون 8 أحرف على الأقل.");
+  if (pass.length < 6) return show(msg, "كلمة المرور لازم تكون 6 أحرف أو أرقام على الأقل.");
   if (!$("suTerms").checked) return show(msg, "وافق على شروط الاستخدام لإكمال التسجيل.");
   btn.disabled = true; btn.textContent = "جاري إنشاء الحساب…";
   try {
-    const cred = await createUserWithEmailAndPassword(auth, email, pass);
+    const cred = await createUserWithEmailAndPassword(auth, phoneLogin(phone), pass);
     await updateProfile(cred.user, { displayName: name });
-    await setDoc(doc(db, "users", cred.user.uid), { name, role, createdAt: serverTimestamp() });
+    await setDoc(doc(db, "users", cred.user.uid), { name, role, loginBy: "phone", createdAt: serverTimestamp() });
     await setDoc(doc(db, "users", cred.user.uid, "private", "contact"), { phone });
     $("helloName").textContent = "مرحباً " + name;
     location.hash = "#home";
@@ -1433,7 +1446,8 @@ async function checkAdmin(){
 async function loadAccount(){
   $("acMsg").className = "msg";
   const u = currentUser;
-  $("acName").textContent = u.displayName || ""; $("acEmail").textContent = u.email || "";
+  $("acName").textContent = u.displayName || "";
+  $("acEmail").textContent = isPhoneAccount(u) ? `تدخل برقم ${u.email.split("@")[0]}` : (u.email || "");
   $("acAvatar").textContent = (u.displayName || "؟").trim().charAt(0);
   $("acNameIn").value = u.displayName || "";
   try {
@@ -1462,8 +1476,16 @@ $("acForm").addEventListener("submit", async (e) => {
   $("acSave").disabled = false;
 });
 $("acPass").addEventListener("click", async () => {
-  try { await sendPasswordResetEmail(auth, currentUser.email); show($("acMsg"), "أرسلنا لك رابط تغيير كلمة المرور على بريدك.", true); }
-  catch(err){ show($("acMsg"), errText(err.code)); }
+  const m = $("acMsg"), oldP = $("pwOld").value, newP = $("pwNew").value;
+  if (newP.length < 6) return show(m, "كلمة المرور الجديدة لازم تكون 6 أحرف أو أرقام على الأقل.");
+  $("acPass").disabled = true;
+  try {
+    await reauthenticateWithCredential(currentUser, EmailAuthProvider.credential(currentUser.email, oldP));
+    await updatePassword(currentUser, newP);
+    $("pwOld").value = ""; $("pwNew").value = ""; $("acPassBox").open = false;
+    show(m, "تغيّرت كلمة المرور.", true);
+  } catch(err){ show(m, err.code === "auth/invalid-credential" || err.code === "auth/wrong-password" ? "كلمة المرور الحالية غير صحيحة." : errText(err.code)); }
+  $("acPass").disabled = false; window.scrollTo(0,0);
 });
 $("acOut").addEventListener("click", async () => { if (confirm("تبي تسجّل خروج؟")) { await signOut(auth); location.hash = "#home"; } });
 
