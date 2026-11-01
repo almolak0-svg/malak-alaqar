@@ -130,6 +130,30 @@ textarea.ta{min-height:140px;padding:12px 14px;border-radius:12px;border:1px sol
 .bar{position:sticky;bottom:0;display:flex;gap:10px;padding:12px 0 calc(16px + env(safe-area-inset-bottom,0px));background:var(--surface)}
 .bar .primary{flex:1}
 .ghost{height:52px;padding:0 18px;border-radius:12px;border:1px solid var(--line);background:var(--raised);color:var(--ink);font-size:15px;font-weight:600;cursor:pointer}
+
+/* details */
+.cardlink{display:block;color:inherit;text-decoration:none}
+.gallery{position:relative;margin:0 -16px;height:300px;background:#DCE7E6;display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none}
+.gallery::-webkit-scrollbar{display:none}
+.gallery img{flex:0 0 100%;width:100%;height:100%;object-fit:cover;scroll-snap-align:center}
+.gallery .empty-ph{flex:0 0 100%;display:flex;align-items:center;justify-content:center}
+.galtop{position:absolute;top:12px;right:12px;left:12px;display:flex;justify-content:space-between;pointer-events:none}
+.galtop a,.galtop span{pointer-events:auto}
+.round{width:44px;height:44px;border-radius:999px;background:var(--raised);display:flex;align-items:center;justify-content:center}
+.galcount{height:26px;padding:0 10px;border-radius:999px;background:rgba(27,47,91,.78);color:#fff;font-size:12px;display:inline-flex;align-items:center;align-self:flex-start;margin-top:9px}
+.dsheet{margin:-20px -16px 0;position:relative;border-radius:20px 20px 0 0;background:var(--surface);padding:20px 16px 8px;display:flex;flex-direction:column;gap:16px}
+.dtitle{font-size:20px;line-height:32px}
+.bigprice{font-family:var(--kufi);font-size:26px;line-height:38px}
+.facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.fact{padding:12px;border-radius:12px;background:var(--raised);border:1px solid var(--line);display:flex;flex-direction:column}
+.fact small{font-size:12px;color:var(--muted)}.fact b{font-size:14px}
+.desc{margin:0;font-size:15px;line-height:26px;white-space:pre-line}
+.lockrow{display:flex;align-items:center;gap:10px;padding:12px;border-radius:12px;background:var(--surface)}
+.lockrow span{flex:1;display:flex;flex-direction:column}.lockrow small{font-size:12px;color:var(--muted)}
+.lockrow b{font-size:14px}
+.status{padding:12px;border-radius:12px;font-size:14px;line-height:22px}
+.status.wait{background:#FFF4E5;color:#A35F00}.status.ok{background:#E5F3EA;color:var(--ok)}.status.no{background:#FBE9E7;color:var(--danger)}
+.pill.gold{background:#F3EAD8;color:var(--gold-text)}
 </style>
 </head>
 <body>
@@ -299,11 +323,16 @@ textarea.ta{min-height:140px;padding:12px 14px;border-radius:12px;border:1px sol
   </div>
 </main>
 
+<!-- ============ تفاصيل العقار ============ -->
+<main id="view-detail" class="view wrap">
+  <div id="detail"><p class="meta" style="padding:24px 0">جاري تحميل العقار…</p></div>
+</main>
+
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword,
          updateProfile, sendPasswordResetEmail, signOut } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-auth.js";
-import { getFirestore, collection, query, orderBy, limit, getDocs, getDoc, doc, setDoc, serverTimestamp, runTransaction, writeBatch }
+import { getFirestore, collection, query, orderBy, limit, getDocs, getDoc, doc, setDoc, deleteDoc, serverTimestamp, runTransaction, writeBatch }
          from "https://www.gstatic.com/firebasejs/13.1.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -323,6 +352,7 @@ const $ = (id) => document.getElementById(id);
 function route(){
   const name = (location.hash || "#home").slice(1);
   let v = ["home","login","signup","add"].includes(name) ? name : "home";
+  if (name.startsWith("listing-")) { v = "detail"; openListing(name.slice(8)); }
   if (v === "add" && !currentUser) { location.hash = "#login"; return; }
   if (v === "add") startAdd();
   document.querySelectorAll(".view").forEach(el => el.classList.toggle("on", el.id === "view-" + v));
@@ -436,7 +466,8 @@ function card(l){
     l.baths ? `${esc(l.baths)} دورات` : "",
     l.area ? `${num(l.area)} م²` : ""
   ].filter(Boolean).map(s => `<span>${s}</span>`).join("");
-  return `<article class="card">
+  const open = l.id ? `<a class="cardlink" href="#listing-${esc(l.id)}">` : "";
+  return `${open}<article class="card">
     <div class="ph">${photo}
       <div class="badges"><span class="pill deal">${l.deal === "rent" ? "للإيجار" : "للبيع"}</span><span class="pill owner">من المالك</span></div>
     </div>
@@ -446,7 +477,7 @@ function card(l){
       <div class="meta">${esc(l.city)}${l.district ? "، " + esc(l.district) : ""}</div>
       <div class="specs">${specs}</div>
     </div>
-  </article>`;
+  </article>${l.id ? "</a>" : ""}`;
 }
 
 function render(){
@@ -656,6 +687,142 @@ async function publish(){
   }
   btn.disabled = false; btn.textContent = nextText[A.step];
 }
+
+/* ---------- تفاصيل العقار وطلب المعاينة ---------- */
+let D = null; // العقار المفتوح
+const FEE = 0.01;
+async function openListing(id){
+  $("detail").innerHTML = `<p class="meta" style="padding:24px 0">جاري تحميل العقار…</p>`;
+  try {
+    const snap = await getDoc(doc(db, "listings", id));
+    if (!snap.exists()) { $("detail").innerHTML = `<div class="empty" style="margin-top:24px"><p>هذا الإعلان غير موجود أو انحذف.</p><a class="primary" style="display:inline-flex;align-items:center;padding:0 20px;text-decoration:none" href="#home">ارجع للعروض</a></div>`; return; }
+    D = { id, ...snap.data() };
+    const ph = await getDocs(query(collection(db, "listings", id, "photos"), orderBy("order")));
+    D.photoList = ph.docs.map(d => d.data().data).filter(p => typeof p === "string" && p.startsWith("data:image/"));
+    D.mine = !!currentUser && currentUser.uid === D.ownerId;
+    D.req = null; D.priv = null;
+    if (currentUser && !D.mine){
+      try { const r = await getDoc(doc(db, "viewingRequests", `${id}_${currentUser.uid}`)); if (r.exists()) D.req = r.data(); } catch(e){}
+    }
+    if (D.mine || D.req?.status === "paid"){
+      try { const p = await getDoc(doc(db, "listings", id, "private", "contact")); if (p.exists()) D.priv = p.data(); } catch(e){}
+    }
+    renderDetail();
+  } catch(err){
+    console.error(err);
+    $("detail").innerHTML = `<div class="empty" style="margin-top:24px"><p>ما قدرنا نحمّل العقار. تأكد من الإنترنت ثم حدّث الصفحة.</p></div>`;
+  }
+}
+const backIcon = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1B2F5B" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>`;
+const lockIcon = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7A5A1F" stroke-width="1.8" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>`;
+
+function renderDetail(){
+  const l = D, rent = l.deal === "rent";
+  const fee = Math.round((l.price || 0) * FEE);
+  const pics = l.photoList.length ? l.photoList.map((p,i) => `<img src="${p}" alt="صورة ${i+1} من ${l.photoList.length}">`).join("")
+    : `<div class="empty-ph">${houseIcon}</div>`;
+  const facts = [
+    ["النوع", l.type], ["الغرض", rent ? "للإيجار" : "للبيع"],
+    ["المساحة", l.area ? `${num(l.area)} م²` : ""], ["الغرف", l.rooms || ""],
+    ["دورات المياه", l.baths || ""], ["عمر العقار", l.age === 0 ? "جديد" : (l.age ? `${l.age} سنة` : "")],
+    ["رقم الإعلان", l.number], ["ترخيص الإعلان", l.adLicense || ""]
+  ].filter(([,v]) => v !== "" && v != null).map(([k,v]) => `<div class="fact"><small>${k}</small><b>${esc(v)}</b></div>`).join("");
+  const video = /^https:\/\//.test(l.videoUrl || "") ? `<a class="secondary" href="${esc(l.videoUrl)}" target="_blank" rel="noopener">شاهد جولة الفيديو</a>` : "";
+  const publicMap = l.locationVisibility === "public" && /^https:\/\//.test(l.mapUrl || "")
+    ? `<a class="secondary" href="${esc(l.mapUrl)}" target="_blank" rel="noopener">افتح الموقع على الخريطة</a>` : "";
+
+  $("detail").innerHTML = `
+  <div style="position:relative">
+    <div class="gallery" id="gal">${pics}</div>
+    <div class="galtop"><a class="round" href="#home" aria-label="رجوع">${backIcon}</a>
+      ${l.photoList.length > 1 ? `<span class="galcount" id="galCount">1 / ${l.photoList.length}</span>` : ""}</div>
+  </div>
+  <div class="dsheet">
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div style="display:flex;gap:6px;flex-wrap:wrap"><span class="pill deal">${rent ? "للإيجار" : "للبيع"}</span><span class="pill gold">من المالك</span>${l.negotiable ? '<span class="pill gold">قابل للتفاوض</span>' : ""}</div>
+      <h1 class="dtitle">${esc(l.title)}</h1>
+      <div class="meta">${esc(l.city)}، ${esc(l.district)}</div>
+      <div class="bigprice">${num(l.price)} <small class="meta" style="font-family:var(--sans)">ريال${rent ? " / سنوياً" : ""}</small></div>
+    </div>
+    <div class="facts">${facts}</div>
+    ${l.description ? `<div><h2 style="font-size:16px;line-height:26px;margin-bottom:6px">الوصف</h2><p class="desc">${esc(l.description)}</p></div>` : ""}
+    ${video}${publicMap}
+    ${contactBox(l, fee)}
+    ${actionBox(l, fee)}
+  </div>`;
+
+  const gal = $("gal");
+  gal.addEventListener("scroll", () => {
+    const c = $("galCount"); if (!c) return;
+    const i = Math.round(Math.abs(gal.scrollLeft) / gal.clientWidth) + 1;
+    c.textContent = `${i} / ${l.photoList.length}`;
+  }, { passive:true });
+  wireActions(l);
+}
+
+function contactBox(l, fee){
+  if (D.priv){
+    const map = /^https:\/\//.test(D.priv.mapUrl || "") ? `<a class="secondary" href="${esc(D.priv.mapUrl)}" target="_blank" rel="noopener">الموقع الدقيق على الخريطة</a>` : "";
+    return `<div class="box"><h2>${D.mine ? "بيانات التواصل في إعلانك" : "بيانات المالك"}</h2>
+      <a class="primary" style="display:flex;align-items:center;justify-content:center;text-decoration:none" href="tel:${esc(D.priv.phone)}">اتصل ${esc(D.priv.phone)}</a>
+      <a class="secondary" href="https://wa.me/966${esc(String(D.priv.phone).slice(1))}" target="_blank" rel="noopener">واتساب</a>${map}</div>`;
+  }
+  const hideMap = l.locationVisibility !== "public";
+  return `<div class="box lock"><h2>بيانات المالك مقفلة</h2>
+    <p>جوال المالك${hideMap ? " والموقع الدقيق يظهرون" : " يظهر"} لك بعد موافقته على المعاينة ودفع رسوم الخدمة 1% (${num(fee)} ريال لهذا العقار).</p>
+    <div class="lockrow"><span><small>جوال / واتساب المالك</small><b class="meta" style="letter-spacing:2px">•••• ••• •••</b></span>${lockIcon}</div>
+    ${hideMap ? `<div class="lockrow"><span><small>الموقع على الخريطة</small><b class="meta">الحي فقط حالياً</b></span>${lockIcon}</div>` : ""}</div>`;
+}
+
+function actionBox(l, fee){
+  if (D.mine) return `<div class="status ok">هذا إعلانك. طلبات المعاينة بتظهر لك في «طلباتي» قريباً.</div>`;
+  if (!currentUser) return `<a class="primary" style="display:flex;align-items:center;justify-content:center;text-decoration:none" href="#login">سجّل دخولك لطلب معاينة</a>`;
+  const r = D.req;
+  if (!r) return `<div class="box" id="reqBox"><h2>طلب معاينة</h2>
+      <p>اقترح وقت يناسبك، والمالك يرد عليك هنا.</p>
+      <label class="f">الوقت المناسب لك<input id="rTime" type="text" maxlength="60" placeholder="مثال: الخميس بعد العصر"></label>
+      <label class="f">رسالة للمالك (اختياري)<textarea id="rMsg" class="ta" style="min-height:90px" maxlength="300" placeholder="عرّف بنفسك أو اسأل عن العقار. أرقام الجوال والروابط ما تنرسل."></textarea></label>
+      <div class="msg" id="rErr" role="alert"></div>
+      <button type="button" class="primary" id="rSend">أرسل طلب المعاينة</button></div>`;
+  if (r.status === "pending") return `<div class="status wait">أرسلت طلب معاينة بوقت «${esc(r.proposedTime)}»، وهو بانتظار رد المالك.</div>
+      <button type="button" class="ghost" id="rCancel">إلغاء الطلب</button>`;
+  if (r.status === "rejected") return `<div class="status no">اعتذر المالك عن طلب المعاينة.</div>`;
+  if (r.status === "approved") return `<div class="status ok">وافق المالك على طلب المعاينة. ادفع رسوم الخدمة ${num(fee)} ريال (1%) ليظهر لك جواله${l.locationVisibility !== "public" ? " والموقع" : ""}.</div>
+      <button type="button" class="primary" id="rPay">ادفع ${num(fee)} ريال وأظهر الجوال</button>
+      <p class="meta" style="margin:0">في الإيجار تُحسب النسبة من الإيجار السنوي. تُسترد كاملة إذا أنهى المالك الصفقة، ولا تُسترد إذا انسحب المشتري.</p>`;
+  return "";
+}
+
+const scrub = (t) => String(t || "")
+  .replace(/[٠-٩]/g, d => "٠١٢٣٤٥٦٧٨٩".indexOf(d))
+  .replace(/(\+?\d[\d\s\-]{7,}\d)/g, "•••• مخفي ••••")
+  .replace(/(https?:\/\/\S+|www\.\S+|\S+\.(com|net|sa|me)\S*)/gi, "•••• رابط مخفي ••••");
+
+function wireActions(l){
+  const send = $("rSend");
+  if (send) send.addEventListener("click", async () => {
+    const time = $("rTime").value.trim(), msgEl = $("rErr");
+    if (time.length < 3) return show(msgEl, "اكتب الوقت المناسب لك للمعاينة.");
+    send.disabled = true; send.textContent = "جاري الإرسال…";
+    try {
+      const data = { listingId: l.id, ownerId: l.ownerId, buyerId: currentUser.uid,
+        buyerName: currentUser.displayName || "", listingTitle: l.title, listingNumber: l.number,
+        proposedTime: scrub(time), message: scrub($("rMsg").value.trim()),
+        status: "pending", createdAt: serverTimestamp() };
+      await setDoc(doc(db, "viewingRequests", `${l.id}_${currentUser.uid}`), data);
+      D.req = data; renderDetail();
+    } catch(err){ console.error(err); show(msgEl, "ما قدرنا نرسل الطلب. جرّب مرة ثانية."); send.disabled = false; send.textContent = "أرسل طلب المعاينة"; }
+  });
+  const cancel = $("rCancel");
+  if (cancel) cancel.addEventListener("click", async () => {
+    if (!confirm("تبي تلغي طلب المعاينة؟")) return;
+    try { await deleteDoc(doc(db, "viewingRequests", `${l.id}_${currentUser.uid}`)); D.req = null; renderDetail(); }
+    catch(err){ console.error(err); alert("ما قدرنا نلغي الطلب. جرّب مرة ثانية."); }
+  });
+  const pay = $("rPay");
+  if (pay) pay.addEventListener("click", () => alert("الدفع هو الخطوة الجاية في البناء (وضع تجريبي)."));
+}
+
 function resetAdd(){
   ["aType","aPrice","aCity","aDistrict","aArea","aAge","aMap","aTitle","aDesc","aVideo","aLicense"].forEach(id => $(id).value = "");
   ["aOwnerOk","aTermsOk","aWasata"].forEach(id => $(id).checked = false);
