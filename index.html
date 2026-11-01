@@ -399,7 +399,8 @@ details.report summary{min-height:44px;display:flex;align-items:center;color:var
       <p>ما يشوف رقمك إلا اللي توافق على طلب معاينته ويدفع رسوم الخدمة 1%.</p>
       <label class="f">جوال / واتساب<input id="aPhone" type="tel" inputmode="numeric" placeholder="05xxxxxxxx"></label>
     </div>
-    <label class="toggle"><span><b>أرسل العرض لوسطاء المملكة</b><small>يظهر للوسطاء كعرض من مالك، وتقدر تسحبه متى ما بغيت.</small></span><input id="aWasata" type="checkbox"></label>
+    <!-- مخفي مؤقتاً لين يتفعّل الربط مع وسطاء المملكة -->
+    <label class="toggle" hidden><span><b>أرسل العرض لوسطاء المملكة</b><small>يظهر للوسطاء كعرض من مالك، وتقدر تسحبه متى ما بغيت.</small></span><input id="aWasata" type="checkbox"></label>
   </section>
 
   <!-- الخطوة 2 -->
@@ -501,7 +502,30 @@ details.report summary{min-height:44px;display:flex;align-items:center;color:var
   </div>
   <form id="editForm" novalidate>
     <div class="msg" id="eMsg" role="alert"></div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div style="display:flex;justify-content:space-between"><b style="font-size:13px">صور العقار</b><span class="meta" id="ePhCount">0 من 10</span></div>
+      <div class="photos" id="ePhotos"></div>
+      <input id="ePhInput" type="file" accept="image/*" multiple hidden>
+      <span class="meta">اضغط «غلاف» على أي صورة عشان تصير الأولى.</span>
+    </div>
     <label class="f">عنوان الإعلان<input id="eTitle" type="text" maxlength="60"></label>
+    <label class="f">نوع العقار<select id="eType" class="sel"></select></label>
+    <div class="seg" id="eDeal" style="margin:0">
+      <button type="button" data-deal="sale" aria-pressed="true">للبيع</button>
+      <button type="button" data-deal="rent" aria-pressed="false">للإيجار</button>
+    </div>
+    <div class="row2">
+      <label class="f">المدينة<input id="eCity" type="text"></label>
+      <label class="f">الحي<input id="eDistrict" type="text"></label>
+    </div>
+    <div class="row2">
+      <label class="f">المساحة (م²)<input id="eArea" type="text" inputmode="numeric"></label>
+      <label class="f">عمر العقار (سنة)<input id="eAge" type="text" inputmode="numeric" placeholder="0 = جديد"></label>
+    </div>
+    <div class="row2" id="eRoomsRow">
+      <label class="f">الغرف<input id="eRooms" type="text" inputmode="numeric"></label>
+      <label class="f">دورات المياه<input id="eBaths" type="text" inputmode="numeric"></label>
+    </div>
     <label class="f"><span id="ePriceLabel">السعر (ريال)</span><input id="ePrice" type="text" inputmode="numeric"></label>
     <label class="check"><input id="eNeg" type="checkbox">السعر قابل للتفاوض</label>
     <label class="f">الوصف<textarea id="eDesc" class="ta" maxlength="1000"></textarea></label>
@@ -517,8 +541,7 @@ details.report summary{min-height:44px;display:flex;align-items:center;color:var
     </div>
     <div class="box lock"><h2>رقم التواصل</h2><p>يظهر فقط لمن توافق عليه ويدفع رسوم الخدمة.</p>
       <label class="f">جوال / واتساب<input id="ePhone" type="tel" inputmode="numeric"></label></div>
-    <label class="toggle"><span><b>أرسل العرض لوسطاء المملكة</b><small>يظهر للوسطاء كعرض من مالك.</small></span><input id="eWasata" type="checkbox"></label>
-    <p class="meta" style="margin:0">النوع والمساحة والصور ما تتعدّل حالياً. إذا تبي تغيّرها احذف الإعلان وأضفه من جديد.</p>
+    <label class="toggle" hidden><span><b>أرسل العرض لوسطاء المملكة</b><small>يظهر للوسطاء كعرض من مالك.</small></span><input id="eWasata" type="checkbox"></label>
     <button type="submit" class="primary" id="eSave">احفظ التعديلات</button>
   </form>
 </main>
@@ -952,8 +975,7 @@ function buildReview(){
     ["الموقع", `${f.city}، ${f.district}`],
     ["ظهور الموقع", f.locationVisibility === "public" ? "يظهر للجميع" : "بعد موافقتك والدفع"],
     ["رقم التواصل", "يظهر بعد موافقتك والدفع"],
-    ["الصور", `${A.photos.length} صور`],
-    ["وسطاء المملكة", f.sendToWasata ? "يُرسل" : "لا يُرسل"]
+    ["الصور", `${A.photos.length} صور`]
   ];
   $("summary").innerHTML = rows.map(([k,v]) => `<div><dt>${k}</dt><dd>${esc(v)}</dd></div>`).join("");
 }
@@ -1458,6 +1480,14 @@ async function openEdit(id){
     $("eNum").textContent = `إعلان ${E.number}`;
     $("ePriceLabel").textContent = E.deal === "rent" ? "الإيجار السنوي (ريال)" : "السعر (ريال)";
     $("eTitle").value = E.title || ""; $("ePrice").value = E.price || ""; $("eNeg").checked = !!E.negotiable;
+    if (!$("eType").options.length) $("eType").innerHTML = $("aType").innerHTML;
+    $("eType").value = E.type || ""; setEDeal(E.deal || "sale");
+    $("eCity").value = E.city || ""; $("eDistrict").value = E.district || "";
+    $("eArea").value = E.area || ""; $("eAge").value = E.age ?? ""; $("eRooms").value = E.rooms || ""; $("eBaths").value = E.baths || "";
+    $("eRoomsRow").hidden = (E.type || "").startsWith("أرض");
+    const ph = await getDocs(query(collection(db, "listings", id, "photos"), orderBy("order")));
+    E.photos = ph.docs.map(d => d.data().data).filter(p => typeof p === "string" && p.startsWith("data:image/"));
+    E.oldCount = ph.size; drawEPhotos();
     $("eDesc").value = E.description || ""; $("eVideo").value = E.videoUrl || ""; $("eLicense").value = E.adLicense || "";
     $("eMap").value = E.locationVisibility === "public" ? (E.mapUrl || "") : (priv.mapUrl || "");
     document.querySelector(`input[name="elocvis"][value="${E.locationVisibility === "public" ? "public" : "approved"}"]`).checked = true;
@@ -1475,15 +1505,27 @@ $("editForm").addEventListener("submit", async (e) => {
   if (!/^05\d{8}$/.test(phone)) return show(m, "رقم الجوال لازم يبدأ بـ05 ويتكون من 10 أرقام.");
   if (mapUrl && !/^https:\/\/(maps\.app\.goo\.gl|goo\.gl\/maps|(www\.)?google\.[a-z.]+\/maps|maps\.google\.[a-z.]+)/i.test(mapUrl)) return show(m, "رابط الموقع لازم يكون من قوقل ماب.");
   if (videoUrl && !/^https:\/\/(www\.|m\.|vm\.)?(youtube\.com|youtu\.be|tiktok\.com)\//i.test(videoUrl)) return show(m, "رابط الفيديو لازم يكون من يوتيوب أو تيك توك.");
+  const type = $("eType").value, city = $("eCity").value.trim(), district = $("eDistrict").value.trim();
+  if (!type) return show(m, "اختر نوع العقار.");
+  if (!city || !district) return show(m, "اكتب المدينة والحي.");
+  if (!E.photos.length) return show(m, "خلّ صورة واحدة على الأقل للعقار.");
+  const land = type.startsWith("أرض"), ageTxt = digits($("eAge").value);
   btn.disabled = true; btn.textContent = "جاري الحفظ…";
   try {
+    const thumb = await shrink(await (await fetch(E.photos[0])).blob(), 480, 0.6);
     const batch = writeBatch(db);
+    E.photos.forEach((p, i) => batch.set(doc(db, "listings", E.id, "photos", String(i)), { order: i, data: p }));
+    for (let i = E.photos.length; i < E.oldCount; i++) batch.delete(doc(db, "listings", E.id, "photos", String(i)));
     batch.update(doc(db, "listings", E.id), {
+      type, deal: E.deal, city, district, area: +digits($("eArea").value) || 0,
+      age: ageTxt === "" ? null : +ageTxt, rooms: land ? 0 : (+digits($("eRooms").value) || 0), baths: land ? 0 : (+digits($("eBaths").value) || 0),
+      thumb, photoCount: E.photos.length,
       title, price, negotiable: $("eNeg").checked, description: $("eDesc").value.trim(), videoUrl,
       adLicense: digits($("eLicense").value), locationVisibility: vis, mapUrl: vis === "public" ? mapUrl : "",
       sendToWasata: $("eWasata").checked });
     batch.set(doc(db, "listings", E.id, "private", "contact"), { phone, mapUrl: vis === "public" ? "" : mapUrl });
     await batch.commit();
+    E.oldCount = E.photos.length;
     show(m, "انحفظت التعديلات.", true);
     loadListings();
     setTimeout(() => { location.hash = "#mine"; }, 700);
@@ -1655,6 +1697,39 @@ $("fToggle").addEventListener("click", () => {
 ["fMin","fMax","fArea"].forEach(id => $(id).addEventListener("input", render));
 $("fClear").addEventListener("click", () => {
   ["fMin","fMax","fArea"].forEach(id => $(id).value = ""); $("fCity").value = ""; $("fRooms").value = "0"; $("fSort").value = "new"; render();
+});
+
+
+/* ---------- تعديل الصور والنوع ---------- */
+function setEDeal(d){
+  E.deal = d;
+  $("eDeal").querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x.dataset.deal === d));
+  $("ePriceLabel").textContent = d === "rent" ? "الإيجار السنوي (ريال)" : "السعر (ريال)";
+}
+$("eDeal").addEventListener("click", (e) => { const b = e.target.closest("button"); if (b) setEDeal(b.dataset.deal); });
+$("eType").addEventListener("change", () => { $("eRoomsRow").hidden = $("eType").value.startsWith("أرض"); });
+function drawEPhotos(){
+  const tiles = E.photos.map((p,i) => `<div class="tile"><img src="${p}" alt="صورة ${i+1}">
+    ${i === 0 ? '<span class="cover pill deal">الغلاف</span>' : `<button type="button" class="pill owner" data-ecover="${i}" style="position:absolute;bottom:6px;right:6px;top:auto;left:auto;width:auto;height:30px;padding:0 10px;border:none;border-radius:999px;background:#FFFFFF;color:#7A5A1F;font-size:12px;font-weight:600;cursor:pointer">غلاف</button>`}
+    <button type="button" data-edel="${i}" aria-label="حذف الصورة ${i+1}"><span>×</span></button></div>`).join("");
+  const add = E.photos.length < 10 ? `<button type="button" class="addph" id="eAddPh">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#0D7377" stroke-width="1.8" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>أضف صور</button>` : "";
+  $("ePhotos").innerHTML = tiles + add;
+  $("ePhCount").textContent = `${E.photos.length} من 10`;
+}
+$("ePhotos").addEventListener("click", (e) => {
+  const del = e.target.closest("[data-edel]"), cov = e.target.closest("[data-ecover]");
+  if (del) { E.photos.splice(+del.dataset.edel, 1); drawEPhotos(); return; }
+  if (cov) { const [p] = E.photos.splice(+cov.dataset.ecover, 1); E.photos.unshift(p); drawEPhotos(); return; }
+  if (e.target.closest("#eAddPh")) $("ePhInput").click();
+});
+$("ePhInput").addEventListener("change", async (e) => {
+  const files = [...e.target.files].slice(0, 10 - E.photos.length);
+  for (const f of files){
+    try { E.photos.push(await shrink(f, 1280, 0.7)); drawEPhotos(); }
+    catch(err){ show($("eMsg"), "ما قدرنا نقرأ إحدى الصور. جرّب صورة ثانية."); }
+  }
+  e.target.value = "";
 });
 
 function resetAdd(){
