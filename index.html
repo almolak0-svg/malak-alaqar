@@ -198,6 +198,10 @@ textarea.ta{min-height:140px;padding:12px 14px;border-radius:12px;border:1px sol
 .paylines div{display:flex;justify-content:space-between;font-size:14px;color:var(--muted)}
 .paylines div.total{padding-top:10px;border-top:1px solid var(--line);font-size:16px;color:var(--ink);font-weight:700}
 .testtag{align-self:flex-start}
+.bankrow{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:14px}
+.bankrow b{direction:ltr;unicode-bidi:plaintext;word-break:break-all}
+.copy{min-height:36px;padding:0 12px;border-radius:10px;border:1px solid var(--line);background:var(--raised);color:var(--brand);font:inherit;font-size:13px;font-weight:600;cursor:pointer;flex:none}
+.receipt{width:100%;max-height:420px;object-fit:contain;border-radius:12px;border:1px solid var(--line);background:#fff}
 
 /* bottom nav */
 .nav{position:fixed;bottom:0;left:0;right:0;z-index:20;display:none;justify-content:space-around;align-items:flex-start;height:calc(68px + env(safe-area-inset-bottom,0px));padding:0 8px env(safe-area-inset-bottom,0px);background:var(--raised);border-top:1px solid var(--line)}
@@ -591,7 +595,7 @@ details.report summary{min-height:44px;display:flex;align-items:center;color:var
     <a class="iconbtn" href="#account" aria-label="رجوع"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1B2F5B" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a>
     <h1>لوحة الإدارة</h1>
   </div>
-  <div class="seg" id="adTabs"><button type="button" data-ad="open" aria-pressed="true">بلاغات جديدة</button><button type="button" data-ad="hidden" aria-pressed="false">إعلانات مخفية</button></div>
+  <div class="seg" id="adTabs"><button type="button" data-ad="pay" aria-pressed="true">التحويلات</button><button type="button" data-ad="open" aria-pressed="false">البلاغات</button><button type="button" data-ad="hidden" aria-pressed="false">المخفية</button><button type="button" data-ad="bank" aria-pressed="false">الحساب</button></div>
   <div class="rqlist" id="adList"><p class="meta">جاري التحميل…</p></div>
 </main>
 
@@ -617,7 +621,7 @@ details.report summary{min-height:44px;display:flex;align-items:center;color:var
   <div class="formtop"><a class="iconbtn" href="javascript:history.back()" aria-label="رجوع"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1B2F5B" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a><h1>رسوم الخدمة والاسترداد</h1></div>
   <p class="draft">مسودة أولية للتجربة. لازم يراجعها محامٍ أو مستشار نظامي قبل الإطلاق.</p>
   <h2>قيمة الرسوم</h2><ul><li>البيع: 1% من سعر العقار المعلن.</li><li>الإيجار: 1% من قيمة الإيجار السنوي.</li></ul>
-  <h2>متى تُدفع</h2><p>بعد موافقة المالك على طلب المعاينة، ويظهر بعدها جوال المالك (والموقع الدقيق إذا كان مقفلاً).</p>
+  <h2>متى تُدفع وكيف</h2><p>بعد موافقة المالك على طلب المعاينة، يحوّل المشتري الرسوم تحويلاً بنكياً أو عبر STC Pay ويرفع صورة إيصال التحويل. بعد تأكيد الإدارة للتحويل يظهر جوال المالك (والموقع الدقيق إذا كان مقفلاً).</p>
   <h2>الاسترداد</h2><ul><li>تُسترد كاملة إذا أنهى المالك الصفقة من جهته.</li><li>لا تُسترد إذا انسحب المشتري أو المستأجر بعد الدفع.</li></ul>
 </main>
 
@@ -1146,11 +1150,12 @@ function actionBox(l, fee){
   if (r.status === "rejected") return `<div class="status no">اعتذر المالك عن طلب المعاينة.</div>`;
   const rid = `${l.id}_${currentUser.uid}`;
   const chatBtn = `<a class="secondary" href="#chat-${esc(rid)}">المحادثة مع المالك</a>`;
-  if (r.status === "approved") return `<div class="status ok">وافق المالك على طلب المعاينة. ادفع رسوم الخدمة ${num(fee)} ريال (1%) ليظهر لك جواله${l.locationVisibility !== "public" ? " والموقع" : ""}.</div>
+  if (r.status === "paySubmitted") return `<div class="status wait">أرسلت إيصال تحويل ${num(fee)} ريال، والإدارة تراجعه. أول ما يتأكد التحويل يظهر لك جوال المالك.</div>${chatBtn}`;
+  if (r.status === "approved") return `${r.payNote ? `<div class="status no">ما تأكد تحويلك السابق: ${esc(r.payNote)}</div>` : ""}<div class="status ok">وافق المالك على طلب المعاينة. حوّل رسوم الخدمة ${num(fee)} ريال (1%) وارفع الإيصال، ويظهر لك جواله${l.locationVisibility !== "public" ? " والموقع" : ""} بعد التأكيد.</div>
       <a class="primary" style="display:flex;align-items:center;justify-content:center;text-decoration:none" href="#pay-${esc(rid)}">ادفع ${num(fee)} ريال وأظهر الجوال</a>
       ${chatBtn}
       <p class="meta" style="margin:0">في الإيجار تُحسب النسبة من الإيجار السنوي. تُسترد كاملة إذا أنهى المالك الصفقة، ولا تُسترد إذا انسحب المشتري.</p>`;
-  if (r.status === "paid") return `<div class="status ok">دفعت رسوم الخدمة، وصارت بيانات المالك ظاهرة لك فوق.</div>${chatBtn}`;
+  if (r.status === "paid") return `<div class="status ok">تأكد تحويلك، وصارت بيانات المالك ظاهرة لك فوق.</div>${chatBtn}`;
   if (r.status === "ownerCancelled") return `<div class="status no">ألغى المالك الصفقة، وتُرد لك رسوم الخدمة كاملة.</div>`;
   return "";
 }
@@ -1160,16 +1165,51 @@ const scrub = (t) => String(t || "")
   .replace(/(\+?\d[\d\s\-]{5,}\d)/g, "•••• مخفي ••••")
   .replace(/(https?:\/\/\S+|www\.\S+|\S+\.(com|net|sa|me)\S*)/gi, "•••• رابط مخفي ••••");
 
+/* ---------- منع وسائل التواصل في المحادثة ---------- */
+const NUMW = { "صفر":0,"زيرو":0,"واحد":1,"وحده":1,"اثنين":2,"اثنان":2,"اتنين":2,"ثنين":2,"ثلاث":3,"ثلاثه":3,"تلات":3,"تلاته":3,
+  "اربع":4,"اربعه":4,"خمس":5,"خمسه":5,"ست":6,"سته":6,"سبع":7,"سبعه":7,"ثمان":8,"ثماني":8,"ثمانيه":8,"ثمنيه":8,"تمنيه":8,"تمانيه":8,
+  "تسع":9,"تسعه":9,"zero":0,"one":1,"two":2,"three":3,"four":4,"five":5,"six":6,"seven":7,"eight":8,"nine":9 };
+function numNorm(t){
+  let n = String(t || "").toLowerCase()
+    .replace(/[\u064B-\u0652\u0640]/g, "").replace(/[أإآ]/g, "ا").replace(/ة/g, "ه").replace(/ى/g, "ي")
+    .replace(/[٠-٩]/g, d => "٠١٢٣٤٥٦٧٨٩".indexOf(d)).replace(/[۰-۹]/g, d => "۰۱۲۳۴۵۶۷۸۹".indexOf(d));
+  n = n.replace(/\p{L}+/gu, w => {
+    let k = w; if (!(k in NUMW) && k.startsWith("و") && (k.slice(1) in NUMW)) k = k.slice(1);
+    return k in NUMW ? ` ${NUMW[k]} ` : w;
+  });
+  return n.replace(/(\d)[^\p{L}\d]+(?=\d)/gu, "$1");   // يجمع الأرقام المفصولة بمسافات أو رموز
+}
+const phoneRun = (r) => r.length >= 11 || (r.length >= 9 && /^(0|5|966|00)/.test(r));
+const isPhone = (s) => /^(0?5\d{8}|(00)?9665\d{8})$/.test(s);
+const numberish = (t) => { const n = numNorm(t); return /\d/.test(n) && n.replace(/[\d\s\p{P}\p{S}]/gu, "").length <= 3; };
+function contactIssue(raw, prevMine = []){
+  const n = numNorm(raw);
+  if (/(https?:\/\/|www\.|wa\.me|t\.me|\.com\b|\.net\b|\.sa\b|\.me\b)/.test(n)) return "الروابط ممنوعة في المحادثة.";
+  if (/(@|واتس|وتساب|whatsapp|تلقرام|تليقرام|تليجرام|تيليجرام|telegram|سناب|snapchat|انستا|instagram|ايميل|email|gmail|hotmail|رقمي|رقمك|جوالي|جوالك|اتصل علي|كلمني علي)/.test(n))
+    return "ممنوع تبادل الجوال أو وسائل التواصل داخل المحادثة.";
+  if ((n.match(/\d+/g) || []).some(phoneRun)) return "رسالتك فيها رقم جوال.";
+  if (numberish(raw)) {   // رقم مقسّم على أكثر من رسالة
+    const trail = [];
+    for (let i = prevMine.length - 1; i >= 0 && trail.length < 5 && numberish(prevMine[i]); i--) trail.unshift(prevMine[i]);
+    const parts = [...trail, raw].map(t => numNorm(t).replace(/\D/g, ""));
+    for (let i = 0; i < parts.length - 1; i++) if (isPhone(parts.slice(i).join(""))) return "ممنوع إرسال رقم الجوال مقسّم على أكثر من رسالة.";
+  }
+  return "";
+}
+const CONTACT_TIP = "التواصل المباشر يتفعّل بعد موافقة المالك ودفع رسوم الخدمة. الأرقام الثانية مثل السعر والمساحة عادي تكتبها.";
+
 function wireActions(l){
   const send = $("rSend");
   if (send) send.addEventListener("click", async () => {
     const time = $("rTime").value.trim(), msgEl = $("rErr");
     if (time.length < 3) return show(msgEl, "اكتب الوقت المناسب لك للمعاينة.");
+    const issue = contactIssue(time) || contactIssue($("rMsg").value);
+    if (issue) return show(msgEl, `${issue} ${CONTACT_TIP}`);
     send.disabled = true; send.textContent = "جاري الإرسال…";
     try {
       const data = { listingId: l.id, ownerId: l.ownerId, buyerId: currentUser.uid,
         buyerName: currentUser.displayName || "", listingTitle: l.title, listingNumber: l.number,
-        proposedTime: scrub(time), message: scrub($("rMsg").value.trim()),
+        proposedTime: time, message: $("rMsg").value.trim(),
         status: "pending", createdAt: serverTimestamp() };
       await setDoc(doc(db, "viewingRequests", `${l.id}_${currentUser.uid}`), data);
       D.req = data; renderDetail();
@@ -1196,8 +1236,8 @@ function wireActions(l){
 
 /* ---------- طلباتي ---------- */
 const R = { side:"owner", st:"pending", owner:[], buyer:[] };
-const stName = { pending:"بانتظار الرد", approved:"مقبول", paid:"مدفوع", rejected:"معتذر عنه", ownerCancelled:"ألغاه المالك" };
-const stClass = { pending:"wait", approved:"ok", paid:"ok", rejected:"no", ownerCancelled:"no" };
+const stName = { pending:"بانتظار الرد", approved:"مقبول", paySubmitted:"بانتظار تأكيد التحويل", paid:"مدفوع", rejected:"معتذر عنه", ownerCancelled:"ألغاه المالك" };
+const stClass = { pending:"wait", approved:"ok", paySubmitted:"wait", paid:"ok", rejected:"no", ownerCancelled:"no" };
 const whenText = (ts) => {
   if (!ts?.toDate) return "الآن";
   const m = Math.round((Date.now() - ts.toDate().getTime()) / 60000);
@@ -1234,7 +1274,7 @@ async function loadRequests(){
   }
 }
 function drawRequests(){
-  const list = (R.side === "owner" ? R.owner : R.buyer).filter(r => r.status === R.st);
+  const list = (R.side === "owner" ? R.owner : R.buyer).filter(r => r.status === R.st || (R.st === "approved" && r.status === "paySubmitted"));
   $("rqNote").hidden = R.side !== "owner";
   if (!list.length){
     const empty = R.side === "owner"
@@ -1250,7 +1290,7 @@ function ownerCard(r){
   let acts = r.status === "pending" ? `<div class="rqact">
       <button type="button" class="btn-ok" data-act="approved" data-id="${esc(r.id)}">وافق</button>
       <button type="button" class="btn-no" data-act="rejected" data-id="${esc(r.id)}">اعتذر</button></div>` : "";
-  if (r.status === "approved" || r.status === "paid") acts = `<div class="rqact">
+  if (["approved","paySubmitted","paid"].includes(r.status)) acts = `<div class="rqact">
       <button type="button" class="btn-no" data-act="ownerCancelled" data-id="${esc(r.id)}">إنهاء الصفقة من جهتي</button></div>`;
   acts += `<a class="secondary" href="#chat-${esc(r.id)}">المحادثة${isUnread(r) ? ' <span class="pill new">رسالة جديدة</span>' : ""}</a>`;
   return `<article class="rq">
@@ -1264,9 +1304,10 @@ function ownerCard(r){
 }
 function buyerCard(r){
   const hint = { pending:"بانتظار رد المالك.", approved:"وافق المالك. افتح الإعلان وادفع رسوم الخدمة ليظهر لك جواله.",
-    paid:"دفعت الرسوم. افتح الإعلان لتشوف جوال المالك.", rejected:"اعتذر المالك عن هذا الطلب.",
+    paySubmitted:"أرسلت إيصال التحويل، والإدارة تراجعه. أول ما يتأكد يظهر لك جوال المالك.",
+    paid:"تأكد تحويلك. افتح الإعلان لتشوف جوال المالك.", rejected:"اعتذر المالك عن هذا الطلب.",
     ownerCancelled:"ألغى المالك الصفقة، وتُرد لك الرسوم كاملة." }[r.status] || "";
-  const chat = ["pending","approved","paid"].includes(r.status) ? `<a class="secondary" href="#chat-${esc(r.id)}">المحادثة${isUnread(r) ? ' <span class="pill new">رسالة جديدة</span>' : ""}</a>` : "";
+  const chat = ["pending","approved","paySubmitted","paid"].includes(r.status) ? `<a class="secondary" href="#chat-${esc(r.id)}">المحادثة${isUnread(r) ? ' <span class="pill new">رسالة جديدة</span>' : ""}</a>` : "";
   return `<article class="rq">
     <div class="rqhead"><span class="who"><b>${esc(r.listingTitle)}</b><span class="meta">إعلان ${esc(r.listingNumber)} · ${whenText(r.createdAt)}</span></span>
       <span class="pill ${stClass[r.status] || "wait"}">${stName[r.status] || r.status}</span></div>
@@ -1317,7 +1358,7 @@ async function openChat(reqId){
     $("chatListing").textContent = `${req.listingTitle} · إعلان ${req.listingNumber}`;
     $("chatListing").href = `#listing-${req.listingId}`;
     $("chatBack").href = iAmOwner ? "#requests" : `#listing-${req.listingId}`;
-    $("chatForm").hidden = !["pending","approved","paid"].includes(req.status);
+    $("chatForm").hidden = !["pending","approved","paySubmitted","paid"].includes(req.status);
     if (chatUnsub) chatUnsub();
     chatUnsub = onSnapshot(query(collection(db, "chats", reqId, "messages"), orderBy("createdAt")),
       (snap) => { drawChat(snap.docs.map(d => d.data())); markRead(reqId); },
@@ -1328,14 +1369,16 @@ async function openChat(reqId){
   }
 }
 function drawChat(msgs){
+  C.msgs = msgs;
   const { req, iAmOwner, reqId } = C;
-  let html = `<p class="sys">لحماية الطرفين، أرقام الجوال والروابط تُخفى تلقائياً من المحادثة.</p>`;
+  let html = `<p class="sys">لحماية الطرفين، ممنوع تبادل الجوال أو وسائل التواصل هنا. السعر والمساحة وباقي الأرقام عادي.</p>`;
   if (req.message) html += `<div class="bub ${iAmOwner ? "them" : "me"}">${esc(req.message)}<small>رسالة طلب المعاينة</small></div>`;
   html += msgs.map(m => `<div class="bub ${m.senderId === currentUser.uid ? "me" : "them"}">${esc(m.text)}<small>${timeOf(m.createdAt)}</small></div>`).join("");
   if (!iAmOwner && req.status === "approved")
     html += `<div class="box" style="border-color:var(--brand)"><b style="color:var(--ok)">وافق المالك على المعاينة</b>
-      <p>ادفع رسوم الخدمة 1% ليظهر لك جوال المالك.</p>
+      <p>حوّل رسوم الخدمة 1% وارفع الإيصال، ويظهر لك جوال المالك بعد تأكيد التحويل.</p>
       <a class="primary" style="display:flex;align-items:center;justify-content:center;text-decoration:none" href="#pay-${esc(reqId)}">ادفع وأظهر الجوال</a></div>`;
+  if (!iAmOwner && req.status === "paySubmitted") html += `<p class="sys">أرسلت إيصال التحويل، والإدارة تراجعه.</p>`;
   if (req.status === "rejected") html += `<p class="sys">اعتذر المالك عن هذا الطلب.</p>`;
   if (req.status === "ownerCancelled") html += `<p class="sys">ألغى المالك الصفقة.</p>`;
   $("chatList").innerHTML = html;
@@ -1344,18 +1387,27 @@ function drawChat(msgs){
 $("chatForm").addEventListener("submit", async (e) => {
   e.preventDefault();
   const raw = $("chatInput").value.trim(); if (!raw || !C) return;
-  const text = scrub(raw);
+  const mine = (C.msgs || []).filter(m => m.senderId === currentUser.uid).map(m => m.text);
+  const issue = contactIssue(raw, mine);
+  if (issue) { alert(`${issue}\n${CONTACT_TIP}`); return; }
+  const text = raw;
   $("chatInput").value = "";
   try {
     const batch = writeBatch(db);
     batch.set(doc(collection(db, "chats", C.reqId, "messages")), { senderId: currentUser.uid, text, createdAt: serverTimestamp() });
     batch.update(doc(db, "viewingRequests", C.reqId), { lastMsgAt: serverTimestamp(), lastMsgBy: currentUser.uid });
     await batch.commit();
-    if (text !== raw) alert("أخفينا رقم أو رابط من رسالتك. التواصل المباشر يتفعّل بعد الدفع.");
   } catch(err){ console.error(err); $("chatInput").value = raw; alert("ما انرسلت الرسالة. جرّب مرة ثانية."); }
 });
 
-/* ---------- الدفع (وضع تجريبي) ---------- */
+/* ---------- الدفع بالتحويل وإيصال ---------- */
+const copyBtn = (v) => `<button type="button" class="copy" data-copy="${esc(v)}">نسخ</button>`;
+document.addEventListener("click", async (e) => {
+  const c = e.target.closest("[data-copy]"); if (!c) return;
+  try { await navigator.clipboard.writeText(c.dataset.copy); c.textContent = "تم النسخ"; setTimeout(() => c.textContent = "نسخ", 1500); }
+  catch(err){ prompt("انسخ من هنا:", c.dataset.copy); }
+});
+async function getBank(){ try { const d = await getDoc(doc(db, "settings", "payment")); return d.exists() ? d.data() : null; } catch(e){ return null; } }
 async function openPay(reqId){
   const body = $("payBody");
   body.innerHTML = `<p class="meta">جاري التحميل…</p>`;
@@ -1364,12 +1416,14 @@ async function openPay(reqId){
     if (!r.exists() || r.data().buyerId !== currentUser.uid) { body.innerHTML = `<div class="empty"><p>هذا الطلب غير متاح.</p></div>`; return; }
     const req = r.data();
     $("payBack").href = `#listing-${req.listingId}`;
-    if (req.status === "paid") { body.innerHTML = `<div class="status ok">دفعت رسوم هذا الطلب من قبل.</div><a class="secondary" href="#listing-${esc(req.listingId)}">افتح الإعلان</a>`; return; }
+    if (req.status === "paid") { body.innerHTML = `<div class="status ok">تأكد تحويلك من قبل.</div><a class="secondary" href="#listing-${esc(req.listingId)}">افتح الإعلان</a>`; return; }
+    if (req.status === "paySubmitted") { body.innerHTML = `<div class="status wait">أرسلت الإيصال، والإدارة تراجعه. أول ما يتأكد يظهر لك جوال المالك.</div><a class="secondary" href="#listing-${esc(req.listingId)}">افتح الإعلان</a>`; return; }
     if (req.status !== "approved") { body.innerHTML = `<div class="status wait">الدفع يتاح بعد موافقة المالك على طلب المعاينة.</div>`; return; }
-    const l = (await getDoc(doc(db, "listings", req.listingId))).data();
+    const [l, bank] = await Promise.all([getDoc(doc(db, "listings", req.listingId)).then(d => d.data()), getBank()]);
     const fee = Math.round((l.price || 0) * FEE), rent = l.deal === "rent";
+    const hasBank = bank && (bank.iban || bank.stcpay);
     body.innerHTML = `
-      <span class="pill gold testtag">وضع تجريبي — ما يُخصم أي مبلغ</span>
+      ${req.payNote ? `<div class="status no">ما تأكد تحويلك السابق: ${esc(req.payNote)}</div>` : ""}
       <div class="box" style="flex-direction:row;align-items:center">
         ${l.thumb ? `<img src="${l.thumb}" alt="" style="width:56px;height:56px;border-radius:10px;object-fit:cover">` : ""}
         <span style="display:flex;flex-direction:column"><b style="font-size:14px">${esc(l.title)}</b><span class="meta">إعلان ${esc(l.number)} · ${esc(l.city)}، ${esc(l.district)}</span></span>
@@ -1377,38 +1431,66 @@ async function openPay(reqId){
       <div class="box paylines">
         <div><span>${rent ? "الإيجار السنوي" : "سعر العقار"}</span><span>${num(l.price)} ريال</span></div>
         <div><span>نسبة الخدمة</span><span>1%</span></div>
-        <div class="total"><span>المبلغ المستحق</span><span>${num(fee)} ريال</span></div>
+        <div class="total"><span>المبلغ المطلوب تحويله</span><span>${num(fee)} ريال</span></div>
       </div>
+      ${hasBank ? `<div class="box">
+        <h2>حوّل المبلغ على</h2>
+        ${bank.bankName ? `<div class="bankrow"><span>البنك</span><span><b>${esc(bank.bankName)}</b></span></div>` : ""}
+        ${bank.accountName ? `<div class="bankrow"><span>اسم الحساب</span><span><b>${esc(bank.accountName)}</b></span></div>` : ""}
+        ${bank.iban ? `<div class="bankrow"><span>الآيبان</span><b>${esc(bank.iban)}</b>${copyBtn(bank.iban)}</div>` : ""}
+        ${bank.stcpay ? `<div class="bankrow"><span>STC Pay</span><b>${esc(bank.stcpay)}</b>${copyBtn(bank.stcpay)}</div>` : ""}
+        ${bank.note ? `<p class="meta" style="margin:0">${esc(bank.note)}</p>` : ""}
+        <div class="bankrow"><span>المبلغ</span><b>${fee}</b>${copyBtn(String(fee))}</div>
+      </div>` : `<div class="status wait">بيانات التحويل ما تجهّزت للحين. حاول بعد شوي.</div>`}
       <div class="box" style="background:#F3EAD8;border-color:#F3EAD8">
         <h2 style="color:var(--gold-text)">سياسة الاسترداد</h2>
         <p style="color:var(--ink)">✓ تُسترد كاملة إذا أنهى المالك الصفقة من جهته.</p>
         <p style="color:var(--ink)">✕ لا تُسترد إذا انسحب المشتري بعد الدفع.</p>
       </div>
-      <fieldset><legend>طريقة الدفع</legend>
-        <label class="opt"><input type="radio" name="paym" value="mada" checked><span><b>مدى</b></span></label>
-        <label class="opt"><input type="radio" name="paym" value="applepay"><span><b>Apple Pay</b></span></label>
-        <label class="opt"><input type="radio" name="paym" value="card"><span><b>بطاقة ائتمانية</b></span></label>
+      <fieldset><legend>حوّلت عن طريق</legend>
+        ${bank?.iban ? `<label class="opt"><input type="radio" name="paym" value="bank" checked><span><b>تحويل بنكي</b></span></label>` : ""}
+        ${bank?.stcpay ? `<label class="opt"><input type="radio" name="paym" value="stcpay" ${bank?.iban ? "" : "checked"}><span><b>STC Pay</b></span></label>` : ""}
       </fieldset>
+      <label class="f">اسم المحوِّل (كما يظهر في الإيصال)<input id="paySender" type="text" maxlength="60"></label>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <b style="font-size:13px">صورة إيصال التحويل</b>
+        <img id="payPrev" class="receipt" alt="معاينة الإيصال" hidden>
+        <button type="button" class="secondary" id="payPick">ارفع صورة الإيصال</button>
+        <input id="payFile" type="file" accept="image/*" hidden>
+      </div>
       <label class="check"><input id="payOk" type="checkbox">قرأت سياسة الاسترداد وأوافق على شروط الخدمة.</label>
       <div class="msg" id="payMsg" role="alert"></div>
-      <button type="button" class="primary" id="payBtn">ادفع ${num(fee)} ريال</button>`;
+      <button type="button" class="primary" id="payBtn" ${hasBank ? "" : "disabled"}>أرسل الإيصال للتأكيد</button>`;
+    let receipt = "";
+    $("payPick").addEventListener("click", () => $("payFile").click());
+    $("payFile").addEventListener("change", async (e) => {
+      const f = e.target.files[0]; if (!f) return;
+      try { receipt = await shrink(f, 1400, 0.7); $("payPrev").src = receipt; $("payPrev").hidden = false; $("payPick").textContent = "غيّر صورة الإيصال"; }
+      catch(err){ show($("payMsg"), "ما قدرنا نقرأ الصورة. جرّب صورة ثانية (لقطة شاشة للإيصال)."); }
+      e.target.value = "";
+    });
     $("payBtn").addEventListener("click", async () => {
-      if (!$("payOk").checked) return show($("payMsg"), "وافق على سياسة الاسترداد لإكمال الدفع.");
-      const btn = $("payBtn"); btn.disabled = true; btn.textContent = "جاري الدفع…";
+      const m = $("payMsg"), sender = $("paySender").value.trim();
+      if (!sender) return show(m, "اكتب اسم المحوِّل.");
+      if (!receipt) return show(m, "ارفع صورة إيصال التحويل.");
+      if (receipt.length > 900000) return show(m, "صورة الإيصال كبيرة. ارفع لقطة شاشة بدلها.");
+      if (!$("payOk").checked) return show(m, "وافق على سياسة الاسترداد لإكمال الدفع.");
+      const btn = $("payBtn"); btn.disabled = true; btn.textContent = "جاري الإرسال…";
       try {
         const batch = writeBatch(db);
         batch.set(doc(db, "payments", reqId), {
-          reqId, listingId: req.listingId, buyerId: req.buyerId, ownerId: req.ownerId,
-          amount: fee, method: document.querySelector('input[name="paym"]:checked').value,
-          mode: "test", createdAt: serverTimestamp() });
-        batch.update(doc(db, "viewingRequests", reqId), { status: "paid", paidAt: serverTimestamp(), paymentRef: reqId });
+          reqId, listingId: req.listingId, listingTitle: req.listingTitle || l.title, listingNumber: req.listingNumber || l.number,
+          buyerId: req.buyerId, buyerName: currentUser.displayName || "", ownerId: req.ownerId,
+          amount: fee, method: document.querySelector('input[name="paym"]:checked')?.value || "bank",
+          senderName: sender, receipt, mode: "transfer", status: "pending", createdAt: serverTimestamp() });
+        batch.update(doc(db, "viewingRequests", reqId), { status: "paySubmitted", paySubmittedAt: serverTimestamp(), payNote: "" });
         await batch.commit();
-        alert("تم الدفع (تجريبي). صار جوال المالك ظاهر لك.");
+        alert("وصل إيصالك. الإدارة تراجع التحويل، وأول ما يتأكد يظهر لك جوال المالك.");
         location.hash = `#listing-${req.listingId}`;
       } catch(err){
         console.error(err);
-        show($("payMsg"), err.code === "permission-denied" ? "ما تم الدفع. تأكد إنك حدّثت قواعد Firestore." : "ما تم الدفع. جرّب مرة ثانية.");
-        btn.disabled = false; btn.textContent = `ادفع ${num(fee)} ريال`;
+        show(m, err.code === "permission-denied" ? "ما انرسل الإيصال. تأكد إنك حدّثت قواعد Firestore." : "ما انرسل الإيصال. جرّب مرة ثانية.");
+        btn.disabled = false; btn.textContent = "أرسل الإيصال للتأكيد";
       }
     });
   } catch(err){
@@ -1417,6 +1499,86 @@ async function openPay(reqId){
   }
 }
 
+/* ---------- الإدارة: التحويلات والحساب البنكي ---------- */
+const methodName = { bank:"تحويل بنكي", stcpay:"STC Pay" };
+async function loadAdminPay(){
+  const [pend, canc] = await Promise.all([
+    getDocs(query(collection(db, "payments"), where("status", "==", "pending"))),
+    getDocs(query(collection(db, "viewingRequests"), where("status", "==", "ownerCancelled")))
+  ]);
+  const pays = pend.docs.map(d => ({ id:d.id, ...d.data() })).sort((a,b) => (a.createdAt?.seconds||0) - (b.createdAt?.seconds||0));
+  const refunds = [];
+  for (const r of canc.docs){
+    const p = await getDoc(doc(db, "payments", r.id));
+    if (p.exists() && p.data().status === "confirmed") refunds.push({ id:p.id, ...p.data() });
+  }
+  const cancelledIds = new Set(canc.docs.map(d => d.id));
+  let html = `<h2 style="margin:0">بانتظار التأكيد (${pays.length})</h2>`;
+  html += pays.length ? pays.map(p => `<article class="rq">
+      <div class="rqhead"><span class="who"><b>${num(p.amount)} ريال · ${methodName[p.method] || p.method}</b><span class="meta">${whenText(p.createdAt)}</span></span><span class="pill wait">جديد</span></div>
+      <a class="meta" href="#listing-${esc(p.listingId)}">${esc(p.listingTitle || "")} · إعلان ${esc(p.listingNumber || "")}</a>
+      <div style="font-size:14px">المشتري: <b>${esc(p.buyerName || "—")}</b> · المحوِّل: <b>${esc(p.senderName || "—")}</b></div>
+      ${cancelledIds.has(p.id) ? `<div class="status no">ألغى المالك الصفقة. لا تأكّد، رجّع المبلغ للمشتري ثم اضغط «تم الاسترداد».</div>` : ""}
+      <details><summary class="meta" style="cursor:pointer">عرض الإيصال</summary><img class="receipt" src="${p.receipt}" alt="إيصال التحويل" style="margin-top:8px"></details>
+      <div class="rqact">${cancelledIds.has(p.id)
+        ? `<button type="button" class="btn-ok" data-refund="${esc(p.id)}">تم الاسترداد</button>`
+        : `<button type="button" class="btn-ok" data-pok="${esc(p.id)}">تأكيد التحويل</button>
+           <button type="button" class="btn-no" data-pno="${esc(p.id)}">رفض</button>`}</div></article>`).join("")
+    : `<div class="empty"><p>ما فيه تحويلات بانتظار التأكيد.</p></div>`;
+  if (refunds.length) html += `<h2 style="margin:8px 0 0">مبالغ لازم تُسترد (${refunds.length})</h2>` + refunds.map(p => `<article class="rq">
+      <div class="rqhead"><span class="who"><b>${num(p.amount)} ريال</b><span class="meta">المحوِّل: ${esc(p.senderName || "—")}</span></span><span class="pill no">ألغاه المالك</span></div>
+      <a class="meta" href="#listing-${esc(p.listingId)}">${esc(p.listingTitle || "")} · إعلان ${esc(p.listingNumber || "")}</a>
+      <p class="meta" style="margin:0">رجّع المبلغ للمشتري على نفس الحساب اللي حوّل منه، ثم اضغط «تم الاسترداد».</p>
+      <div class="rqact"><button type="button" class="btn-ok" data-refund="${esc(p.id)}">تم الاسترداد</button></div></article>`).join("");
+  $("adList").innerHTML = html;
+}
+async function loadAdminBank(){
+  const b = (await getBank()) || {};
+  $("adList").innerHTML = `<div class="box">
+    <h2>الحساب اللي يحوّل عليه المشترين</h2>
+    <p class="meta" style="margin:0">تظهر هذي البيانات في صفحة الدفع لكل مشتري.</p>
+    <label class="f">اسم البنك<input id="bkBank" type="text" maxlength="60" value="${esc(b.bankName || "")}"></label>
+    <label class="f">اسم صاحب الحساب<input id="bkName" type="text" maxlength="80" value="${esc(b.accountName || "")}"></label>
+    <label class="f">رقم الآيبان<input id="bkIban" type="text" maxlength="34" dir="ltr" placeholder="SA…" value="${esc(b.iban || "")}"></label>
+    <label class="f">رقم STC Pay (اختياري)<input id="bkStc" type="text" inputmode="numeric" maxlength="15" dir="ltr" value="${esc(b.stcpay || "")}"></label>
+    <label class="f">ملاحظة للمشتري (اختياري)<input id="bkNote" type="text" maxlength="150" value="${esc(b.note || "")}" placeholder="مثال: اكتب رقم الإعلان في وصف التحويل"></label>
+    <div class="msg" id="bkMsg" role="alert"></div>
+    <button type="button" class="primary" id="bkSave">احفظ</button></div>`;
+  $("bkSave").addEventListener("click", async () => {
+    const iban = $("bkIban").value.replace(/\s/g, "").toUpperCase(), stc = digits($("bkStc").value), m = $("bkMsg");
+    if (!iban && !stc) return show(m, "اكتب الآيبان أو رقم STC Pay على الأقل.");
+    if (iban && !/^SA\d{22}$/.test(iban)) return show(m, "الآيبان السعودي يبدأ بـ SA وبعده 22 رقم.");
+    try {
+      await setDoc(doc(db, "settings", "payment"), { bankName: $("bkBank").value.trim(), accountName: $("bkName").value.trim(),
+        iban, stcpay: stc, note: $("bkNote").value.trim(), updatedAt: serverTimestamp() });
+      show(m, "انحفظت بيانات الحساب.", true);
+    } catch(err){ console.error(err); show(m, "ما انحفظت. تأكد إنك حدّثت القواعد."); }
+  });
+}
+$("adList").addEventListener("click", async (e) => {
+  const ok = e.target.closest("[data-pok]"), no = e.target.closest("[data-pno]"), rf = e.target.closest("[data-refund]");
+  if (!ok && !no && !rf) return;
+  try {
+    if (ok){
+      if (!confirm("تأكدت إن المبلغ وصل حسابك؟ بعد التأكيد يظهر جوال المالك للمشتري.")) return;
+      const id = ok.dataset.pok, batch = writeBatch(db);
+      batch.update(doc(db, "payments", id), { status: "confirmed", reviewedAt: serverTimestamp() });
+      batch.update(doc(db, "viewingRequests", id), { status: "paid", paidAt: serverTimestamp(), paymentRef: id });
+      await batch.commit();
+    } else if (no){
+      const why = prompt("سبب الرفض (يظهر للمشتري):", "ما وصلنا التحويل أو المبلغ ناقص.");
+      if (why === null) return;
+      const id = no.dataset.pno, batch = writeBatch(db);
+      batch.update(doc(db, "payments", id), { status: "rejected", reviewedAt: serverTimestamp(), rejectReason: why.slice(0, 150) });
+      batch.update(doc(db, "viewingRequests", id), { status: "approved", payNote: why.slice(0, 150) || "ما تأكد التحويل." });
+      await batch.commit();
+    } else {
+      if (!confirm("رجّعت المبلغ للمشتري؟")) return;
+      await updateDoc(doc(db, "payments", rf.dataset.refund), { status: "refunded", reviewedAt: serverTimestamp() });
+    }
+    loadAdmin();
+  } catch(err){ console.error(err); alert("ما تم الإجراء. يمكن المالك ألغى الصفقة، أو القواعد ما تحدّثت."); loadAdmin(); }
+});
 
 /* ---------- عقاراتي ---------- */
 
@@ -1589,12 +1751,14 @@ $("acPass").addEventListener("click", async () => {
 $("acOut").addEventListener("click", async () => { if (confirm("تبي تسجّل خروج؟")) { await signOut(auth); location.hash = "#home"; } });
 
 /* ---------- لوحة الإدارة ---------- */
-let AD = { tab:"open" };
+let AD = { tab:"pay" };
 async function loadAdmin(){
   await checkAdmin();
   if (!IS_ADMIN) { $("adList").innerHTML = `<div class="empty"><p>هذي الصفحة للإدارة فقط.</p></div>`; return; }
   $("adList").innerHTML = `<p class="meta">جاري التحميل…</p>`;
   try {
+    if (AD.tab === "pay") return await loadAdminPay();
+    if (AD.tab === "bank") return await loadAdminBank();
     if (AD.tab === "open"){
       const snap = await getDocs(query(collection(db, "reports"), where("status", "==", "open")));
       const reps = snap.docs.map(d => ({ id:d.id, ...d.data() })).sort((a,b) => (b.createdAt?.seconds||0) - (a.createdAt?.seconds||0));
