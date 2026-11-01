@@ -120,6 +120,7 @@ textarea.ta{min-height:140px;padding:12px 14px;border-radius:12px;border:1px sol
 .box.lock{border:1px dashed var(--gold)}
 .box h2{font-size:15px;line-height:24px}
 .box p{margin:0;font-size:13px;line-height:21px;color:var(--muted)}
+[hidden]{display:none!important}
 .toggle{display:flex;align-items:center;gap:12px;padding:14px 16px;border-radius:12px;background:var(--raised);border:1px solid var(--line);cursor:pointer}
 .toggle span{flex:1}.toggle b{display:block;font-size:14px}.toggle small{font-size:12px;color:var(--muted);line-height:18px}
 .toggle input{width:22px;height:22px;accent-color:var(--brand)}
@@ -279,7 +280,7 @@ details.report summary{min-height:44px;display:flex;align-items:center;color:var
       <label class="f">الغرف<select id="fRooms" class="sel"><option value="0">أي عدد</option><option value="1">1+</option><option value="2">2+</option><option value="3">3+</option><option value="4">4+</option><option value="5">5+</option></select></label>
     </div>
     <label class="f">الترتيب<select id="fSort" class="sel"><option value="new">الأحدث</option><option value="low">السعر: الأقل أولاً</option><option value="high">السعر: الأعلى أولاً</option><option value="area">المساحة: الأكبر أولاً</option></select></label>
-    <button type="button" class="ghost" id="fClear">مسح الفلاتر</button>
+    <button type="button" class="ghost" id="fClear">مسح</button>
   </div>
   <div class="seg" id="dealSeg">
     <button type="button" data-deal="all" aria-pressed="true">الكل</button>
@@ -324,11 +325,10 @@ details.report summary{min-height:44px;display:flex;align-items:center;color:var
   </div>
   <form id="signupForm" novalidate>
     <div class="msg" id="signupMsg" role="alert"></div>
-    <fieldset>
-      <legend>وش تبي من التطبيق؟</legend>
+    <fieldset aria-label="نوع الحساب">
       <label class="opt"><input type="radio" name="role" value="buyer" checked><span><b>أبحث عن عقار</b><span>شراء أو إيجار، وطلب معاينة من المالك مباشرة.</span></span></label>
-      <label class="opt"><input type="radio" name="role" value="owner"><span><b>عندي عقار أعرضه</b><span>أضيف عقاري وأتحكم بمن يعاينه.</span></span></label>
-      <label class="opt"><input type="radio" name="role" value="both"><span><b>الاثنين</b><span>تقدر تغيّرها لاحقاً من حسابك.</span></span></label>
+      <label class="opt"><input type="radio" name="role" value="owner"><span><b>مالك عقار</b><span>أضيف عقاري وأتحكم بمن يعاينه.</span></span></label>
+      <label class="opt"><input type="radio" name="role" value="both"><span><b>الكل</b><span>تقدر تغيّرها لاحقاً من حسابك.</span></span></label>
     </fieldset>
     <label class="f">الاسم<input id="suName" type="text" autocomplete="name" placeholder="الاسم الأول واسم العائلة" required></label>
     <label class="f">رقم الجوال<input id="suPhone" type="tel" inputmode="numeric" autocomplete="username" placeholder="05xxxxxxxx" required><small>تدخل فيه للتطبيق، وما يظهر لأحد إلا بعد موافقتك ودفع رسوم الخدمة.</small></label>
@@ -557,8 +557,8 @@ details.report summary{min-height:44px;display:flex;align-items:center;color:var
       <label class="f">جوال التواصل<input id="acPhone" type="tel" inputmode="numeric"><small>الرقم اللي ينكشف لمن يدفع رسوم الخدمة. رقم الدخول نفسه ما يتغيّر.</small></label>
       <fieldset><legend>نوع الحساب</legend>
         <label class="opt"><input type="radio" name="acrole" value="buyer"><span><b>أبحث عن عقار</b></span></label>
-        <label class="opt"><input type="radio" name="acrole" value="owner"><span><b>عندي عقار أعرضه</b></span></label>
-        <label class="opt"><input type="radio" name="acrole" value="both"><span><b>الاثنين</b></span></label>
+        <label class="opt"><input type="radio" name="acrole" value="owner"><span><b>مالك عقار</b></span></label>
+        <label class="opt"><input type="radio" name="acrole" value="both"><span><b>الكل</b></span></label>
       </fieldset>
       <button type="submit" class="primary" id="acSave">احفظ</button>
     </form>
