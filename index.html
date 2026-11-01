@@ -45,6 +45,8 @@ a{color:var(--brand)}
 .search input{flex:1;min-width:0;border:none;outline:none;background:transparent;color:var(--ink)}
 .seg{display:flex;gap:4px;padding:4px;border-radius:12px;background:#EAE2D3;margin-top:12px}
 .seg button{flex:1;height:40px;border:none;border-radius:10px;background:transparent;color:var(--muted);font-weight:500;cursor:pointer}
+#adTabs{overflow-x:auto;scrollbar-width:none}
+#adTabs button{flex:1 0 auto;padding:0 12px}
 .seg button[aria-pressed="true"]{background:var(--raised);color:var(--ink);font-weight:600}
 .chips{display:flex;gap:8px;overflow-x:auto;margin:12px -16px 0;padding:0 16px 4px;scrollbar-width:none}
 .chips::-webkit-scrollbar{display:none}
@@ -309,14 +311,36 @@ details.report summary{min-height:44px;display:flex;align-items:center;color:var
   </div>
   <form id="loginForm" novalidate>
     <div class="msg" id="loginMsg" role="alert"></div>
-    <label class="f">رقم الجوال<input id="loginEmail" type="text" inputmode="tel" autocomplete="username" placeholder="05xxxxxxxx" required><small>إذا سجّلت سابقاً بالبريد الإلكتروني، اكتبه هنا.</small></label>
+    <label class="f">رقم الجوال<input id="loginEmail" type="text" inputmode="tel" autocomplete="username" placeholder="05xxxxxxxx" required><small>إذا أضفت إيميل لحسابك، تقدر تدخل فيه بعد.</small></label>
     <label class="f">كلمة المرور<input id="loginPass" type="password" autocomplete="current-password" placeholder="••••••••" required></label>
-    <button type="button" class="link" id="forgotBtn">نسيت كلمة المرور؟</button>
+    <a class="link" href="#forgot">نسيت كلمة المرور؟</a>
     <button type="submit" class="primary" id="loginSubmit">دخول</button>
   </form>
   <div class="or">أو</div>
   <a class="secondary" href="#signup">إنشاء حساب جديد</a>
   <p class="center"><a class="link muted" href="#home">تصفح العقارات بدون حساب</a></p>
+</main>
+
+<!-- ============ نسيت كلمة المرور ============ -->
+<main id="view-forgot" class="view wrap">
+  <div class="formtop">
+    <a class="iconbtn" href="#login" aria-label="رجوع"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1B2F5B" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a>
+    <h1>نسيت كلمة المرور</h1>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:16px;margin-top:8px">
+    <p class="meta" style="margin:0">اكتب رقم الجوال اللي تدخل فيه. إذا كان لحسابك إيميل، يوصلك عليه رابط تغيير كلمة المرور. وإذا ما له إيميل، ترسل طلب للإدارة.</p>
+    <label class="f">رقم الجوال<input id="fgPhone" type="tel" inputmode="numeric" placeholder="05xxxxxxxx"></label>
+    <div class="msg" id="fgMsg" role="alert"></div>
+    <button type="button" class="primary" id="fgGo">تابع</button>
+    <div id="fgReq" class="box" hidden>
+      <h2>طلب استعادة الحساب من الإدارة</h2>
+      <p>حسابك ما له إيميل. أرسل طلبك، والإدارة تتصل عليك على نفس الرقم للتأكد منك. بعدها تسجّل من جديد بنفس الرقم، وترجع لك إعلاناتك وطلبات المعاينة عليها.</p>
+      <label class="f">الاسم المسجّل في الحساب<input id="fgName" type="text" maxlength="60"></label>
+      <label class="f">ملاحظة (اختياري)<input id="fgNote" type="text" maxlength="200" placeholder="مثال: أفضل وقت للاتصال بعد العصر"></label>
+      <div class="msg" id="fgReqMsg" role="alert"></div>
+      <button type="button" class="primary" id="fgSend">أرسل الطلب</button>
+    </div>
+  </div>
 </main>
 
 <!-- ============ إنشاء حساب ============ -->
@@ -569,6 +593,13 @@ details.report summary{min-height:44px;display:flex;align-items:center;color:var
     <div class="menu">
       <a href="#favs">المفضلة</a>
       <a href="#admin" id="acAdmin" hidden>لوحة الإدارة <span class="badge" id="adminBadge" hidden>0</span></a>
+      <details id="acMailBox" style="border-bottom:1px solid var(--line)"><summary style="min-height:52px;display:flex;align-items:center;padding:0 16px;cursor:pointer;font-size:15px">إيميل استرجاع كلمة المرور</summary>
+        <div style="display:flex;flex-direction:column;gap:12px;padding:0 16px 16px">
+          <p class="meta" style="margin:0" id="acMailState"></p>
+          <label class="f">الإيميل<input id="mlNew" type="email" dir="ltr" autocomplete="email" placeholder="name@gmail.com"></label>
+          <label class="f">كلمة المرور الحالية<input id="mlPass" type="password" autocomplete="current-password"></label>
+          <button type="button" class="primary" id="acMail">أرسل رابط التأكيد</button>
+        </div></details>
       <details id="acPassBox" style="border-bottom:1px solid var(--line)"><summary style="min-height:52px;display:flex;align-items:center;padding:0 16px;cursor:pointer;font-size:15px">تغيير كلمة المرور</summary>
         <div style="display:flex;flex-direction:column;gap:12px;padding:0 16px 16px">
           <label class="f">كلمة المرور الحالية<input id="pwOld" type="password" autocomplete="current-password"></label>
@@ -595,7 +626,7 @@ details.report summary{min-height:44px;display:flex;align-items:center;color:var
     <a class="iconbtn" href="#account" aria-label="رجوع"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1B2F5B" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a>
     <h1>لوحة الإدارة</h1>
   </div>
-  <div class="seg" id="adTabs"><button type="button" data-ad="pay" aria-pressed="true">التحويلات</button><button type="button" data-ad="open" aria-pressed="false">البلاغات</button><button type="button" data-ad="hidden" aria-pressed="false">المخفية</button><button type="button" data-ad="bank" aria-pressed="false">الحساب</button></div>
+  <div class="seg" id="adTabs"><button type="button" data-ad="pay" aria-pressed="true">التحويلات</button><button type="button" data-ad="rec" aria-pressed="false">الاستعادة</button><button type="button" data-ad="open" aria-pressed="false">البلاغات</button><button type="button" data-ad="hidden" aria-pressed="false">المخفية</button><button type="button" data-ad="bank" aria-pressed="false">الحساب</button></div>
   <div class="rqlist" id="adList"><p class="meta">جاري التحميل…</p></div>
 </main>
 
@@ -636,7 +667,7 @@ details.report summary{min-height:44px;display:flex;align-items:center;color:var
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword,
-         updateProfile, sendPasswordResetEmail, signOut, reauthenticateWithCredential, updatePassword, EmailAuthProvider } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-auth.js";
+         updateProfile, sendPasswordResetEmail, signOut, reauthenticateWithCredential, updatePassword, EmailAuthProvider, verifyBeforeUpdateEmail } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-auth.js";
 import { getFirestore, collection, query, where, orderBy, limit, getDocs, getDoc, doc, setDoc, updateDoc, deleteDoc, addDoc, onSnapshot, serverTimestamp, runTransaction, writeBatch, arrayUnion, arrayRemove }
          from "https://www.gstatic.com/firebasejs/13.1.0/firebase-firestore.js";
 
@@ -656,7 +687,7 @@ const $ = (id) => document.getElementById(id);
 /* ---------- التنقل بين الشاشات ---------- */
 function route(){
   const name = (location.hash || "#home").slice(1);
-  let v = ["home","login","signup","add","requests","mine","account","admin","terms","privacy","refund","favs"].includes(name) ? name : "home";
+  let v = ["home","login","signup","forgot","add","requests","mine","account","admin","terms","privacy","refund","favs"].includes(name) ? name : "home";
   if (v === "favs" && !currentUser) { location.hash = "#login"; return; }
   if (v === "favs") loadFavs();
   if ((v === "account" || v === "admin") && !currentUser) { location.hash = "#login"; return; }
@@ -698,7 +729,8 @@ onAuthStateChanged(auth, (user) => {
     btn.textContent = "خروج"; btn.href = "#home";
     $("reqBtn").hidden = true; btn.hidden = true; loadUserDoc().then(() => { refreshBadge(); render(); }); checkAdmin();
     btn.onclick = async (e) => { e.preventDefault(); await signOut(auth); };
-    if (location.hash === "#login" || location.hash === "#signup") location.hash = "#home";
+    if (["#login","#signup","#forgot"].includes(location.hash)) location.hash = "#home";
+    syncIndex(user);
   } else {
     $("helloName").textContent = "مرحباً بك";
     btn.textContent = "دخول"; btn.href = "#login"; btn.onclick = null;
@@ -733,15 +765,16 @@ $("loginForm").addEventListener("submit", async (e) => {
   const id = $("loginEmail").value.trim();
   if (!id.includes("@") && !/^05\d{8}$/.test(normPhone(id))) { show(msg, "اكتب رقم جوالك بصيغة 05xxxxxxxx."); btn.disabled = false; btn.textContent = "دخول"; return; }
   try { await signInWithEmailAndPassword(auth, loginId(id), $("loginPass").value); }
-  catch(err){ show(msg, errText(err.code)); }
+  catch(err){
+    let done = false;
+    if (!id.includes("@") && err.code === "auth/invalid-credential"){
+      const ix = await getIndex(normPhone(id));
+      const alt = ix?.email || ix?.pendingEmail;
+      if (alt){ try { await signInWithEmailAndPassword(auth, alt, $("loginPass").value); done = true; } catch(e2){ err = e2; } }
+    }
+    if (!done) show(msg, errText(err.code));
+  }
   btn.disabled = false; btn.textContent = "دخول";
-});
-
-$("forgotBtn").addEventListener("click", async () => {
-  const msg = $("loginMsg"), email = $("loginEmail").value.trim();
-  if (!email.includes("@")) return show(msg, "إذا نسيت كلمة المرور، تواصل مع إدارة التطبيق وتُعاد لك. وقريباً بتقدر تسترجعها برمز يوصلك على جوالك.");
-  try { await sendPasswordResetEmail(auth, email); show(msg, "أرسلنا لك رابط تغيير كلمة المرور على بريدك.", true); }
-  catch(err){ show(msg, errText(err.code)); }
 });
 
 $("signupForm").addEventListener("submit", async (e) => {
@@ -759,7 +792,8 @@ $("signupForm").addEventListener("submit", async (e) => {
   try {
     const cred = await createUserWithEmailAndPassword(auth, phoneLogin(phone), pass);
     await updateProfile(cred.user, { displayName: name });
-    await setDoc(doc(db, "users", cred.user.uid), { name, role, loginBy: "phone", createdAt: serverTimestamp() });
+    await setDoc(doc(db, "users", cred.user.uid), { name, role, loginBy: "phone", loginPhone: phone, createdAt: serverTimestamp() });
+    try { await setDoc(doc(db, "phoneIndex", phone), { uid: cred.user.uid, email: "", pendingEmail: "", updatedAt: serverTimestamp() }); } catch(e){ console.warn("index", e); }
     await setDoc(doc(db, "users", cred.user.uid, "private", "contact"), { phone });
     $("helloName").textContent = "مرحباً " + name;
     location.hash = "#home";
@@ -1717,6 +1751,7 @@ async function loadAccount(){
     const role = d.exists() ? (d.data().role || "buyer") : "buyer";
     document.querySelector(`input[name="acrole"][value="${role}"]`).checked = true;
   } catch(e){ console.error(e); }
+  drawMailState();
   await checkAdmin();
   if (IS_ADMIN) { try { const n = (await getDocs(query(collection(db, "reports"), where("status", "==", "open")))).size; $("adminBadge").hidden = !n; $("adminBadge").textContent = n; } catch(e){} }
 }
@@ -1750,6 +1785,133 @@ $("acPass").addEventListener("click", async () => {
 });
 $("acOut").addEventListener("click", async () => { if (confirm("تبي تسجّل خروج؟")) { await signOut(auth); location.hash = "#home"; } });
 
+/* ---------- فهرس أرقام الدخول + استرجاع كلمة المرور ---------- */
+async function getIndex(p){ try { const d = await getDoc(doc(db, "phoneIndex", p)); return d.exists() ? d.data() : null; } catch(e){ return null; } }
+const maskMail = (e) => { const [u, d] = String(e).split("@"); return `${u.slice(0, 2)}${"*".repeat(Math.max(2, u.length - 2))}@${d}`; };
+async function syncIndex(user){
+  try {
+    if (isPhoneAccount(user)){
+      const p = user.email.split("@")[0];
+      await setDoc(doc(db, "users", user.uid), { loginPhone: p }, { merge: true });
+      const ix = await getIndex(p);
+      if (!ix) await setDoc(doc(db, "phoneIndex", p), { uid: user.uid, email: "", pendingEmail: "", updatedAt: serverTimestamp() });
+    } else if (user.emailVerified){
+      const u = await getDoc(doc(db, "users", user.uid)); const p = u.exists() ? u.data().loginPhone : "";
+      if (!p) return;
+      const ix = await getIndex(p);
+      if (ix && ix.uid === user.uid && ix.email !== user.email)
+        await updateDoc(doc(db, "phoneIndex", p), { email: user.email, pendingEmail: "", updatedAt: serverTimestamp() });
+    }
+  } catch(e){ console.warn("syncIndex", e); }
+}
+let FG_PHONE = "";
+$("fgGo").addEventListener("click", async () => {
+  const m = $("fgMsg"), p = normPhone($("fgPhone").value);
+  $("fgReq").hidden = true;
+  if (!/^05\d{8}$/.test(p)) return show(m, "اكتب رقم جوالك بصيغة 05xxxxxxxx.");
+  $("fgGo").disabled = true;
+  const ix = await getIndex(p);
+  if (ix?.email){
+    try { await sendPasswordResetEmail(auth, ix.email); show(m, `أرسلنا رابط تغيير كلمة المرور على ${maskMail(ix.email)}. افتح الإيميل (وشيك على الرسائل غير المرغوبة)، ثم ادخل برقم جوالك وكلمة المرور الجديدة.`, true); }
+    catch(err){ show(m, errText(err.code)); }
+  } else {
+    FG_PHONE = p; m.className = "msg"; $("fgReq").hidden = false;
+  }
+  $("fgGo").disabled = false;
+});
+$("fgSend").addEventListener("click", async () => {
+  const m = $("fgReqMsg"), name = $("fgName").value.trim();
+  if (name.length < 2) return show(m, "اكتب اسمك.");
+  $("fgSend").disabled = true;
+  try {
+    await setDoc(doc(db, "recoveryRequests", FG_PHONE), { phone: FG_PHONE, name, note: $("fgNote").value.trim().slice(0, 200), status: "open", createdAt: serverTimestamp() });
+    show(m, "وصل طلبك للإدارة، وبنتصل عليك على نفس الرقم.", true);
+  } catch(err){
+    console.error(err);
+    show(m, err.code === "permission-denied" ? "طلبك موجود عند الإدارة من قبل، وبنتصل عليك قريب." : "ما انرسل الطلب. جرّب مرة ثانية.");
+  }
+  $("fgSend").disabled = false;
+});
+async function drawMailState(){
+  const u = currentUser, st = $("acMailState");
+  if (!isPhoneAccount(u)) { st.textContent = `إيميل حسابك: ${u.email}. إذا نسيت كلمة المرور يوصلك عليه رابط التغيير، وتقدر تدخل بالإيميل أو برقم جوالك.`; return; }
+  const ix = await getIndex(u.email.split("@")[0]);
+  st.textContent = ix?.pendingEmail
+    ? `أرسلنا رابط تأكيد على ${ix.pendingEmail}. افتح الإيميل واضغط الرابط، ثم ادخل من جديد برقم جوالك وكلمة المرور.`
+    : "حسابك ما له إيميل. أضفه عشان إذا نسيت كلمة المرور يوصلك رابط التغيير بدون ما تحتاج الإدارة.";
+}
+$("acMail").addEventListener("click", async () => {
+  const m = $("acMsg"), mail = $("mlNew").value.trim().toLowerCase(), pass = $("mlPass").value;
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mail)) return show(m, "اكتب الإيميل بشكل صحيح.");
+  if (!pass) return show(m, "اكتب كلمة المرور الحالية.");
+  $("acMail").disabled = true;
+  try {
+    await reauthenticateWithCredential(currentUser, EmailAuthProvider.credential(currentUser.email, pass));
+    await verifyBeforeUpdateEmail(currentUser, mail);
+    const u = await getDoc(doc(db, "users", currentUser.uid)); const p = (u.exists() && u.data().loginPhone) || (isPhoneAccount(currentUser) ? currentUser.email.split("@")[0] : "");
+    if (p) { try { await updateDoc(doc(db, "phoneIndex", p), { pendingEmail: mail, updatedAt: serverTimestamp() }); } catch(e){ console.warn(e); } }
+    $("mlPass").value = ""; $("acMailBox").open = false;
+    show(m, `أرسلنا رابط تأكيد على ${mail}. افتحه واضغط الرابط، وبعدها ادخل من جديد برقم جوالك وكلمة المرور كالعادة.`, true);
+  } catch(err){
+    console.error(err);
+    show(m, err.code === "auth/invalid-credential" || err.code === "auth/wrong-password" ? "كلمة المرور الحالية غير صحيحة."
+      : err.code === "auth/email-already-in-use" ? "هذا الإيميل مستخدم في حساب ثاني." : errText(err.code));
+  }
+  $("acMail").disabled = false; window.scrollTo(0,0);
+});
+
+/* ---------- الإدارة: استعادة الحسابات ---------- */
+async function loadAdminRecovery(){
+  const snap = await getDocs(query(collection(db, "recoveryRequests"), where("status", "in", ["open", "approved"])));
+  const reqs = snap.docs.map(d => ({ id:d.id, ...d.data() })).sort((a,b) => (a.createdAt?.seconds||0) - (b.createdAt?.seconds||0));
+  if (!reqs.length) { $("adList").innerHTML = `<div class="empty"><p>ما فيه طلبات استعادة.</p></div>`; return; }
+  const cards = await Promise.all(reqs.map(async (r) => {
+    const ix = await getIndex(r.id);
+    const head = `<div class="rqhead"><span class="who"><b>${esc(r.name)}</b><span class="meta">${whenText(r.createdAt)}</span></span><span class="pill ${r.status === "open" ? "wait" : "ok"}">${r.status === "open" ? "جديد" : "بانتظار التسجيل"}</span></div>
+      <a class="link" href="tel:${esc(r.phone)}" dir="ltr">${esc(r.phone)}</a>${r.note ? `<p class="rqmsg">${esc(r.note)}</p>` : ""}`;
+    if (r.status === "open") return `<article class="rq">${head}
+      <p class="meta" style="margin:0">1) اتصل على الرقم وتأكد إنه صاحب الحساب.<br>2) افتح Firebase ← Authentication ← Users، وابحث عن <b dir="ltr">${esc(r.phone)}@${PHONE_DOMAIN}</b> واحذفه (Delete account).<br>3) اضغط الزر تحت.</p>
+      <label class="f">معرّف الحساب القديم (UID)<input type="text" dir="ltr" data-olduid="${esc(r.id)}" value="${esc(ix?.uid || "")}" placeholder="انسخه من Authentication"></label>
+      <div class="rqact"><button type="button" class="btn-ok" data-rapprove="${esc(r.id)}">تحققت وحذفت الحساب</button>
+        <button type="button" class="ghost" data-rclose="${esc(r.id)}">إغلاق الطلب</button></div></article>`;
+    const registered = ix && ix.uid !== r.oldUid;
+    return `<article class="rq">${head}
+      ${registered ? `<div class="status ok">سجّل من جديد بنفس الرقم. انقل له إعلاناته وطلباته.</div>
+        <div class="rqact"><button type="button" class="btn-ok" data-rmove="${esc(r.id)}" data-new="${esc(ix.uid)}" data-old="${esc(r.oldUid)}">انقل الإعلانات والطلبات</button></div>`
+      : `<div class="status wait">بلّغه يسجّل حساب جديد بنفس الرقم (${esc(r.phone)}). بعدها يظهر لك هنا زر النقل.</div>
+        <div class="rqact"><button type="button" class="ghost" data-rclose="${esc(r.id)}">إغلاق الطلب</button></div>`}</article>`;
+  }));
+  $("adList").innerHTML = cards.join("");
+}
+$("adList").addEventListener("click", async (e) => {
+  const ap = e.target.closest("[data-rapprove]"), mv = e.target.closest("[data-rmove]"), cl = e.target.closest("[data-rclose]");
+  if (!ap && !mv && !cl) return;
+  try {
+    if (ap){
+      const id = ap.dataset.rapprove, old = document.querySelector(`[data-olduid="${CSS.escape(id)}"]`).value.trim();
+      if (old.length < 10) return alert("الصق معرّف الحساب القديم (UID) من Firebase ← Authentication.");
+      if (!confirm("تأكدت من صاحب الرقم وحذفت حسابه القديم من Firebase؟")) return;
+      await updateDoc(doc(db, "recoveryRequests", id), { status: "approved", oldUid: old, handledAt: serverTimestamp() });
+    } else if (mv){
+      const oldU = mv.dataset.old, newU = mv.dataset.new;
+      mv.disabled = true; mv.textContent = "جاري النقل…";
+      const [ls, rq] = await Promise.all([
+        getDocs(query(collection(db, "listings"), where("ownerId", "==", oldU))),
+        getDocs(query(collection(db, "viewingRequests"), where("ownerId", "==", oldU)))]);
+      const batch = writeBatch(db);
+      ls.docs.forEach(d => batch.update(d.ref, { ownerId: newU }));
+      rq.docs.forEach(d => batch.update(d.ref, { ownerId: newU }));
+      batch.update(doc(db, "recoveryRequests", mv.dataset.rmove), { status: "done", newUid: newU, handledAt: serverTimestamp() });
+      await batch.commit();
+      alert(`تم. انتقل ${ls.size} إعلان و${rq.size} طلب معاينة للحساب الجديد.`);
+    } else {
+      if (!confirm("تغلق هذا الطلب بدون استعادة؟")) return;
+      await updateDoc(doc(db, "recoveryRequests", cl.dataset.rclose), { status: "done", handledAt: serverTimestamp() });
+    }
+    loadAdmin();
+  } catch(err){ console.error(err); alert("ما تم الإجراء. تأكد إنك حدّثت القواعد."); loadAdmin(); }
+});
+
 /* ---------- لوحة الإدارة ---------- */
 let AD = { tab:"pay" };
 async function loadAdmin(){
@@ -1759,6 +1921,7 @@ async function loadAdmin(){
   try {
     if (AD.tab === "pay") return await loadAdminPay();
     if (AD.tab === "bank") return await loadAdminBank();
+    if (AD.tab === "rec") return await loadAdminRecovery();
     if (AD.tab === "open"){
       const snap = await getDocs(query(collection(db, "reports"), where("status", "==", "open")));
       const reps = snap.docs.map(d => ({ id:d.id, ...d.data() })).sort((a,b) => (b.createdAt?.seconds||0) - (a.createdAt?.seconds||0));
