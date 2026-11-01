@@ -230,6 +230,18 @@ body.hasnav main.view{padding-bottom:96px}
 .draft{padding:12px;border-radius:12px;background:#FFF4E5;color:#A35F00;font-size:13px;line-height:20px}
 details.report summary{min-height:44px;display:flex;align-items:center;color:var(--muted);font-size:13px;cursor:pointer}
 .pill.hid{background:#FBE9E7;color:var(--danger)}
+
+/* filters, favorites, unread */
+.searchrow{display:flex;gap:8px}.searchrow .search{flex:1}
+.fbtn{position:relative;width:48px;height:48px;border-radius:12px;border:none;background:var(--brand);display:flex;align-items:center;justify-content:center;cursor:pointer;flex:0 0 auto}
+.fbtn .badge{position:absolute;top:-6px;left:-6px}
+.fpanel{margin-top:12px;padding:16px;border-radius:12px;background:var(--raised);border:1px solid var(--line);display:flex;flex-direction:column;gap:12px}
+.fpanel .row2 label.f input,.fpanel select.sel{height:44px}
+.cardwrap{position:relative}
+.favbtn{position:absolute;top:6px;left:6px;width:44px;height:44px;border:none;background:transparent;padding:0;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:2}
+.favbtn span{width:34px;height:34px;border-radius:999px;background:var(--raised);display:flex;align-items:center;justify-content:center}
+.favbtn[aria-pressed="true"] svg{fill:#C0392B;stroke:#C0392B}
+.pill.new{background:var(--brand);color:var(--on-brand)}
 </style>
 </head>
 <body>
@@ -247,10 +259,28 @@ details.report summary{min-height:44px;display:flex;align-items:center;color:var
     <p id="helloName">مرحباً بك</p>
     <h1>عقارك من مالكه… مباشرة</h1>
   </section>
+  <div class="searchrow">
   <label class="search">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5B6478" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>
     <input id="q" type="search" placeholder="ابحث بالمدينة أو الحي أو نوع العقار" aria-label="بحث">
   </label>
+  <button type="button" class="fbtn" id="fToggle" aria-expanded="false" aria-controls="fPanel" aria-label="الفلاتر">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16"/><path d="M7 12h10"/><path d="M10 18h4"/></svg>
+    <span class="badge" id="fCount" hidden>0</span></button>
+  </div>
+  <div class="fpanel" id="fPanel" hidden>
+    <label class="f">المدينة<select id="fCity" class="sel"><option value="">كل المدن</option></select></label>
+    <div class="row2">
+      <label class="f">السعر من<input id="fMin" type="text" inputmode="numeric" placeholder="0"></label>
+      <label class="f">إلى<input id="fMax" type="text" inputmode="numeric" placeholder="بدون حد"></label>
+    </div>
+    <div class="row2">
+      <label class="f">المساحة من (م²)<input id="fArea" type="text" inputmode="numeric" placeholder="0"></label>
+      <label class="f">الغرف<select id="fRooms" class="sel"><option value="0">أي عدد</option><option value="1">1+</option><option value="2">2+</option><option value="3">3+</option><option value="4">4+</option><option value="5">5+</option></select></label>
+    </div>
+    <label class="f">الترتيب<select id="fSort" class="sel"><option value="new">الأحدث</option><option value="low">السعر: الأقل أولاً</option><option value="high">السعر: الأعلى أولاً</option><option value="area">المساحة: الأكبر أولاً</option></select></label>
+    <button type="button" class="ghost" id="fClear">مسح الفلاتر</button>
+  </div>
   <div class="seg" id="dealSeg">
     <button type="button" data-deal="all" aria-pressed="true">الكل</button>
     <button type="button" data-deal="sale" aria-pressed="false">للبيع</button>
@@ -510,6 +540,7 @@ details.report summary{min-height:44px;display:flex;align-items:center;color:var
       <button type="submit" class="primary" id="acSave">احفظ</button>
     </form>
     <div class="menu">
+      <a href="#favs">المفضلة</a>
       <a href="#admin" id="acAdmin" hidden>لوحة الإدارة <span class="badge" id="adminBadge" hidden>0</span></a>
       <details id="acPassBox" style="border-bottom:1px solid var(--line)"><summary style="min-height:52px;display:flex;align-items:center;padding:0 16px;cursor:pointer;font-size:15px">تغيير كلمة المرور</summary>
         <div style="display:flex;flex-direction:column;gap:12px;padding:0 16px 16px">
@@ -523,6 +554,12 @@ details.report summary{min-height:44px;display:flex;align-items:center;color:var
       <button type="button" class="danger" id="acOut">تسجيل الخروج</button>
     </div>
   </div>
+</main>
+
+<!-- ============ المفضلة ============ -->
+<main id="view-favs" class="view wrap">
+  <div class="formtop"><a class="iconbtn" href="#account" aria-label="رجوع"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1B2F5B" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a><h1>المفضلة</h1></div>
+  <div class="list" id="favList" style="margin-top:8px"><p class="meta">جاري التحميل…</p></div>
 </main>
 
 <!-- ============ لوحة الإدارة ============ -->
@@ -573,7 +610,7 @@ details.report summary{min-height:44px;display:flex;align-items:center;color:var
 import { initializeApp } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword,
          updateProfile, sendPasswordResetEmail, signOut, reauthenticateWithCredential, updatePassword, EmailAuthProvider } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-auth.js";
-import { getFirestore, collection, query, where, orderBy, limit, getDocs, getDoc, doc, setDoc, updateDoc, deleteDoc, addDoc, onSnapshot, serverTimestamp, runTransaction, writeBatch }
+import { getFirestore, collection, query, where, orderBy, limit, getDocs, getDoc, doc, setDoc, updateDoc, deleteDoc, addDoc, onSnapshot, serverTimestamp, runTransaction, writeBatch, arrayUnion, arrayRemove }
          from "https://www.gstatic.com/firebasejs/13.1.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -592,7 +629,9 @@ const $ = (id) => document.getElementById(id);
 /* ---------- التنقل بين الشاشات ---------- */
 function route(){
   const name = (location.hash || "#home").slice(1);
-  let v = ["home","login","signup","add","requests","mine","account","admin","terms","privacy","refund"].includes(name) ? name : "home";
+  let v = ["home","login","signup","add","requests","mine","account","admin","terms","privacy","refund","favs"].includes(name) ? name : "home";
+  if (v === "favs" && !currentUser) { location.hash = "#login"; return; }
+  if (v === "favs") loadFavs();
   if ((v === "account" || v === "admin") && !currentUser) { location.hash = "#login"; return; }
   if (v === "account") loadAccount();
   if (v === "admin") loadAdmin();
@@ -630,13 +669,13 @@ onAuthStateChanged(auth, (user) => {
   if (user){
     $("helloName").textContent = "مرحباً " + (user.displayName || "");
     btn.textContent = "خروج"; btn.href = "#home";
-    $("reqBtn").hidden = true; btn.hidden = false; btn.hidden = true; refreshBadge();
+    $("reqBtn").hidden = true; btn.hidden = true; loadUserDoc().then(() => { refreshBadge(); render(); }); checkAdmin();
     btn.onclick = async (e) => { e.preventDefault(); await signOut(auth); };
     if (location.hash === "#login" || location.hash === "#signup") location.hash = "#home";
   } else {
     $("helloName").textContent = "مرحباً بك";
     btn.textContent = "دخول"; btn.href = "#login"; btn.onclick = null;
-    $("reqBtn").hidden = true; btn.hidden = false;
+    $("reqBtn").hidden = true; btn.hidden = false; USERDOC = { favs: [], chatRead: {} }; render();
   }
 });
 
@@ -737,7 +776,7 @@ function card(l){
     l.baths ? `${esc(l.baths)} دورات` : "",
     l.area ? `${num(l.area)} م²` : ""
   ].filter(Boolean).map(s => `<span>${s}</span>`).join("");
-  const open = l.id ? `<a class="cardlink" href="#listing-${esc(l.id)}">` : "";
+  const open = l.id ? `<div class="cardwrap">${favBtn(l.id)}<a class="cardlink" href="#listing-${esc(l.id)}">` : "";
   return `${open}<article class="card">
     <div class="ph">${photo}
       <div class="badges"><span class="pill deal">${l.deal === "rent" ? "للإيجار" : "للبيع"}</span><span class="pill owner">من المالك</span>${l.status === "reserved" ? '<span class="pill res">محجوز</span>' : ""}</div>
@@ -748,15 +787,23 @@ function card(l){
       <div class="meta">${esc(l.city)}${l.district ? "، " + esc(l.district) : ""}</div>
       <div class="specs">${specs}</div>
     </div>
-  </article>${l.id ? "</a>" : ""}`;
+  </article>${l.id ? "</a></div>" : ""}`;
 }
 
 function render(){
-  const q = filter.q;
-  const shown = listings.filter(l =>
+  const q = filter.q, F = readFilters();
+  let shown = listings.filter(l =>
     (filter.deal === "all" || l.deal === filter.deal) &&
     (filter.type === "الكل" || (l.type || "").includes(filter.type)) &&
-    (!q || [l.title, l.city, l.district, l.type].some(v => (v || "").includes(q))));
+    (!q || [l.title, l.city, l.district, l.type].some(v => (v || "").includes(q))) &&
+    (!F.city || l.city === F.city) &&
+    (!F.min || (l.price || 0) >= F.min) && (!F.max || (l.price || 0) <= F.max) &&
+    (!F.area || (l.area || 0) >= F.area) && (!F.rooms || (l.rooms || 0) >= F.rooms));
+  if (F.sort === "low") shown.sort((a,b) => (a.price||0) - (b.price||0));
+  if (F.sort === "high") shown.sort((a,b) => (b.price||0) - (a.price||0));
+  if (F.sort === "area") shown.sort((a,b) => (b.area||0) - (a.area||0));
+  const active = [F.city, F.min, F.max, F.area, F.rooms, F.sort !== "new"].filter(Boolean).length;
+  $("fCount").hidden = !active; $("fCount").textContent = active;
   $("count").textContent = shown.length ? `${shown.length} عرض` : "";
   $("list").innerHTML = shown.length ? shown.map(card).join("") :
     `<div class="empty"><p>${listings.length ? "ما فيه عروض تطابق بحثك. جرّب نوع أو مدينة ثانية." : "ما فيه عقارات منشورة للحين. كن أول مالك يعرض عقاره."}</p>
@@ -765,8 +812,11 @@ function render(){
 
 async function loadListings(){
   try {
-    const snap = await getDocs(query(collection(db, "listings"), orderBy("createdAt","desc"), limit(50)));
+    const snap = await getDocs(query(collection(db, "listings"), orderBy("createdAt","desc"), limit(200)));
     listings = snap.docs.map(d => ({ id:d.id, ...d.data() })).filter(l => ["active","reserved"].includes(l.status || "active"));
+    const cities = [...new Set(listings.map(l => l.city).filter(Boolean))].sort((a,b) => a.localeCompare(b, "ar"));
+    const cur = $("fCity").value;
+    $("fCity").innerHTML = `<option value="">كل المدن</option>` + cities.map(c => `<option${c === cur ? " selected" : ""}>${esc(c)}</option>`).join("");
     render();
   } catch(err){
     $("list").innerHTML = `<div class="empty"><p>ما قدرنا نحمّل العروض. تأكد من الإنترنت ثم حدّث الصفحة.</p></div>`;
@@ -1007,6 +1057,7 @@ function renderDetail(){
   <div style="position:relative">
     <div class="gallery" id="gal">${pics}</div>
     <div class="galtop"><a class="round" href="#home" aria-label="رجوع">${backIcon}</a>
+      <span style="flex:1"></span>${favBtn(l.id, true)}
       ${l.photoList.length > 1 ? `<span class="galcount" id="galCount">1 / ${l.photoList.length}</span>` : ""}</div>
   </div>
   <div class="dsheet">
@@ -1139,17 +1190,20 @@ async function fetchReqs(field){
 }
 async function refreshBadge(){
   try {
-    R.owner = await fetchReqs("ownerId");
-    const n = R.owner.filter(r => r.status === "pending").length;
-    $("reqBadge").hidden = !n; $("reqBadge").textContent = n; $("navBadge").hidden = !n; $("navBadge").textContent = n;
+    [R.owner, R.buyer] = await Promise.all([fetchReqs("ownerId"), fetchReqs("buyerId")]);
+    setNavBadge();
   } catch(e){ console.error(e); }
+}
+function setNavBadge(){
+  const n = R.owner.filter(r => r.status === "pending").length + [...R.owner, ...R.buyer].filter(isUnread).length;
+  $("reqBadge").hidden = !n; $("reqBadge").textContent = n; $("navBadge").hidden = !n; $("navBadge").textContent = n;
 }
 async function loadRequests(){
   $("rqList").innerHTML = `<p class="meta">جاري تحميل الطلبات…</p>`;
   try {
     [R.owner, R.buyer] = await Promise.all([fetchReqs("ownerId"), fetchReqs("buyerId")]);
+    setNavBadge();
     const n = R.owner.filter(r => r.status === "pending").length;
-    $("reqBadge").hidden = !n; $("reqBadge").textContent = n; $("navBadge").hidden = !n; $("navBadge").textContent = n;
     $("rqSide").querySelector('[data-side="owner"]').innerHTML = `على عقاراتي${n ? ` <span class="badge">${n}</span>` : ""}`;
     drawRequests();
   } catch(err){
@@ -1176,7 +1230,7 @@ function ownerCard(r){
       <button type="button" class="btn-no" data-act="rejected" data-id="${esc(r.id)}">اعتذر</button></div>` : "";
   if (r.status === "approved" || r.status === "paid") acts = `<div class="rqact">
       <button type="button" class="btn-no" data-act="ownerCancelled" data-id="${esc(r.id)}">إنهاء الصفقة من جهتي</button></div>`;
-  acts += `<a class="secondary" href="#chat-${esc(r.id)}">المحادثة</a>`;
+  acts += `<a class="secondary" href="#chat-${esc(r.id)}">المحادثة${isUnread(r) ? ' <span class="pill new">رسالة جديدة</span>' : ""}</a>`;
   return `<article class="rq">
     <div class="rqhead"><span class="avatar">${esc(name.trim().charAt(0) || "؟")}</span>
       <span class="who"><b>${esc(name)}</b><span class="meta">${whenText(r.createdAt)}</span></span>
@@ -1190,7 +1244,7 @@ function buyerCard(r){
   const hint = { pending:"بانتظار رد المالك.", approved:"وافق المالك. افتح الإعلان وادفع رسوم الخدمة ليظهر لك جواله.",
     paid:"دفعت الرسوم. افتح الإعلان لتشوف جوال المالك.", rejected:"اعتذر المالك عن هذا الطلب.",
     ownerCancelled:"ألغى المالك الصفقة، وتُرد لك الرسوم كاملة." }[r.status] || "";
-  const chat = ["pending","approved","paid"].includes(r.status) ? `<a class="secondary" href="#chat-${esc(r.id)}">المحادثة</a>` : "";
+  const chat = ["pending","approved","paid"].includes(r.status) ? `<a class="secondary" href="#chat-${esc(r.id)}">المحادثة${isUnread(r) ? ' <span class="pill new">رسالة جديدة</span>' : ""}</a>` : "";
   return `<article class="rq">
     <div class="rqhead"><span class="who"><b>${esc(r.listingTitle)}</b><span class="meta">إعلان ${esc(r.listingNumber)} · ${whenText(r.createdAt)}</span></span>
       <span class="pill ${stClass[r.status] || "wait"}">${stName[r.status] || r.status}</span></div>
@@ -1244,7 +1298,7 @@ async function openChat(reqId){
     $("chatForm").hidden = !["pending","approved","paid"].includes(req.status);
     if (chatUnsub) chatUnsub();
     chatUnsub = onSnapshot(query(collection(db, "chats", reqId, "messages"), orderBy("createdAt")),
-      (snap) => drawChat(snap.docs.map(d => d.data())),
+      (snap) => { drawChat(snap.docs.map(d => d.data())); markRead(reqId); },
       (err) => { console.error(err); $("chatList").innerHTML = `<div class="empty"><p>ما قدرنا نحمّل الرسائل. تأكد إنك حدّثت قواعد Firestore.</p></div>`; });
   } catch(err){
     console.error(err);
@@ -1271,7 +1325,10 @@ $("chatForm").addEventListener("submit", async (e) => {
   const text = scrub(raw);
   $("chatInput").value = "";
   try {
-    await addDoc(collection(db, "chats", C.reqId, "messages"), { senderId: currentUser.uid, text, createdAt: serverTimestamp() });
+    const batch = writeBatch(db);
+    batch.set(doc(collection(db, "chats", C.reqId, "messages")), { senderId: currentUser.uid, text, createdAt: serverTimestamp() });
+    batch.update(doc(db, "viewingRequests", C.reqId), { lastMsgAt: serverTimestamp(), lastMsgBy: currentUser.uid });
+    await batch.commit();
     if (text !== raw) alert("أخفينا رقم أو رابط من رسالتك. التواصل المباشر يتفعّل بعد الدفع.");
   } catch(err){ console.error(err); $("chatInput").value = raw; alert("ما انرسلت الرسالة. جرّب مرة ثانية."); }
 });
@@ -1538,6 +1595,66 @@ $("adList").addEventListener("click", async (e) => {
     } else return;
     loadAdmin(); loadListings();
   } catch(err){ console.error(err); alert("ما تم الإجراء. تأكد إنك حدّثت القواعد."); }
+});
+
+/* ---------- بيانات المستخدم: المفضلة وآخر قراءة للمحادثات ---------- */
+let USERDOC = { favs: [], chatRead: {} };
+async function loadUserDoc(){
+  try {
+    const d = await getDoc(doc(db, "users", currentUser.uid));
+    const x = d.exists() ? d.data() : {};
+    USERDOC = { favs: Array.isArray(x.favs) ? x.favs : [], chatRead: x.chatRead || {} };
+  } catch(e){ console.error(e); }
+}
+function isUnread(r){
+  if (!currentUser || !r.lastMsgBy || r.lastMsgBy === currentUser.uid) return false;
+  return (r.lastMsgAt?.seconds || 0) > (USERDOC.chatRead[r.id]?.seconds || 0);
+}
+async function markRead(reqId){
+  USERDOC.chatRead[reqId] = { seconds: Math.floor(Date.now() / 1000) + 5 };
+  setNavBadge();
+  try { await setDoc(doc(db, "users", currentUser.uid), { chatRead: { [reqId]: serverTimestamp() } }, { merge: true }); } catch(e){ console.error(e); }
+}
+
+/* ---------- المفضلة ---------- */
+const heart = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1B2F5B" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>`;
+function favBtn(id, big){
+  const on = USERDOC.favs.includes(id);
+  return `<button type="button" class="favbtn" data-fav="${esc(id)}" aria-pressed="${on}" aria-label="${on ? "شيل من المفضلة" : "أضف للمفضلة"}" style="${big ? "position:static;pointer-events:auto" : ""}"><span>${heart}</span></button>`;
+}
+document.addEventListener("click", async (e) => {
+  const b = e.target.closest("[data-fav]"); if (!b) return;
+  e.preventDefault(); e.stopPropagation();
+  if (!currentUser) { location.hash = "#login"; return; }
+  const id = b.dataset.fav, on = USERDOC.favs.includes(id);
+  USERDOC.favs = on ? USERDOC.favs.filter(x => x !== id) : [...USERDOC.favs, id];
+  document.querySelectorAll(`[data-fav="${CSS.escape(id)}"]`).forEach(x => { x.setAttribute("aria-pressed", !on); x.setAttribute("aria-label", on ? "أضف للمفضلة" : "شيل من المفضلة"); });
+  try { await setDoc(doc(db, "users", currentUser.uid), { favs: on ? arrayRemove(id) : arrayUnion(id) }, { merge: true }); }
+  catch(err){ console.error(err); alert("ما انحفظت المفضلة. جرّب مرة ثانية."); }
+  if (location.hash === "#favs" && on) loadFavs();
+}, true);
+async function loadFavs(){
+  $("favList").innerHTML = `<p class="meta">جاري التحميل…</p>`;
+  await loadUserDoc();
+  const ids = USERDOC.favs.slice(-60).reverse();
+  if (!ids.length) { $("favList").innerHTML = `<div class="empty"><p>ما حفظت أي عقار للحين. اضغط القلب على أي عقار يعجبك.</p><a class="secondary" href="#home">تصفح العقارات</a></div>`; return; }
+  const docs = await Promise.all(ids.map(id => getDoc(doc(db, "listings", id)).catch(() => null)));
+  const ls = docs.filter(d => d && d.exists() && ["active","reserved","closed"].includes(d.data().status)).map(d => ({ id:d.id, ...d.data() }));
+  $("favList").innerHTML = ls.length ? ls.map(card).join("") : `<div class="empty"><p>العقارات اللي حفظتها انحذفت أو ما عادت متاحة.</p></div>`;
+}
+
+/* ---------- الفلاتر ---------- */
+function readFilters(){
+  return { city: $("fCity").value, min: +digits($("fMin").value) || 0, max: +digits($("fMax").value) || 0,
+    area: +digits($("fArea").value) || 0, rooms: +$("fRooms").value || 0, sort: $("fSort").value };
+}
+$("fToggle").addEventListener("click", () => {
+  const open = $("fPanel").hidden; $("fPanel").hidden = !open; $("fToggle").setAttribute("aria-expanded", open);
+});
+["fCity","fRooms","fSort"].forEach(id => $(id).addEventListener("change", render));
+["fMin","fMax","fArea"].forEach(id => $(id).addEventListener("input", render));
+$("fClear").addEventListener("click", () => {
+  ["fMin","fMax","fArea"].forEach(id => $(id).value = ""); $("fCity").value = ""; $("fRooms").value = "0"; $("fSort").value = "new"; render();
 });
 
 function resetAdd(){
