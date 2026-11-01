@@ -216,6 +216,20 @@ body.hasnav main.view{padding-bottom:96px}
 .minebody .seg{margin:0}
 .minebody .rqact a{flex:1;display:flex;align-items:center;justify-content:center;height:44px;border-radius:12px;border:1px solid var(--brand);color:var(--brand);font-weight:600;font-size:14px;text-decoration:none}
 .pill.res{background:#FFF4E5;color:#A35F00}.pill.closed{background:#EAE2D3;color:var(--muted)}
+
+/* account & pages */
+.acct{display:flex;align-items:center;gap:12px;padding:16px;border-radius:12px;background:var(--raised);border:1px solid var(--line)}
+.acct .avatar{width:56px;height:56px;font-size:20px}
+.menu{display:flex;flex-direction:column;border-radius:12px;background:var(--raised);border:1px solid var(--line);overflow:hidden}
+.menu a,.menu button{display:flex;align-items:center;justify-content:space-between;min-height:52px;padding:0 16px;border:none;border-bottom:1px solid var(--line);background:none;color:var(--ink);font-size:15px;text-decoration:none;cursor:pointer;text-align:right}
+.menu > :last-child{border-bottom:none}
+.menu .danger{color:var(--danger)}
+.legal h2{font-size:16px;line-height:26px;margin:18px 0 6px}
+.legal p,.legal li{font-size:15px;line-height:26px;margin:0 0 8px}
+.legal ul{padding-right:20px;margin:0}
+.draft{padding:12px;border-radius:12px;background:#FFF4E5;color:#A35F00;font-size:13px;line-height:20px}
+details.report summary{min-height:44px;display:flex;align-items:center;color:var(--muted);font-size:13px;cursor:pointer}
+.pill.hid{background:#FBE9E7;color:var(--danger)}
 </style>
 </head>
 <body>
@@ -290,7 +304,7 @@ body.hasnav main.view{padding-bottom:96px}
     <label class="f">رقم الجوال<input id="suPhone" type="tel" inputmode="numeric" autocomplete="tel" placeholder="05xxxxxxxx" required><small>ما يظهر لأحد إلا بعد موافقتك ودفع رسوم الخدمة.</small></label>
     <label class="f">البريد الإلكتروني<input id="suEmail" type="email" autocomplete="email" placeholder="name@example.com" required></label>
     <label class="f">كلمة المرور<input id="suPass" type="password" autocomplete="new-password" placeholder="8 أحرف على الأقل" required></label>
-    <label class="check"><input id="suTerms" type="checkbox">أوافق على شروط الاستخدام وسياسة الخصوصية.</label>
+    <label class="check"><input id="suTerms" type="checkbox"><span>أوافق على <a href="#terms">شروط الاستخدام</a> و<a href="#privacy">سياسة الخصوصية</a>.</span></label>
     <button type="submit" class="primary" id="signupSubmit">إنشاء الحساب</button>
     <p class="center muted">عندك حساب؟ <a class="link" href="#login">سجّل دخولك</a></p>
   </form>
@@ -379,7 +393,7 @@ body.hasnav main.view{padding-bottom:96px}
     <dl class="summary" id="summary" style="margin:0"></dl>
     <label class="f">رقم ترخيص الإعلان العقاري<input id="aLicense" type="text" inputmode="numeric" placeholder="من منصة الهيئة العامة للعقار"><small>مطلوب نظامياً لكل إعلان. تقدر تضيفه الحين أو لاحقاً من تعديل الإعلان.</small></label>
     <label class="check"><input id="aOwnerOk" type="checkbox">أقر بأني مالك العقار أو مفوّض نظامياً بعرضه، وأن البيانات صحيحة.</label>
-    <label class="check"><input id="aTermsOk" type="checkbox">أوافق على شروط الاستخدام وسياسة رسوم الخدمة.</label>
+    <label class="check"><input id="aTermsOk" type="checkbox"><span>أوافق على <a href="#terms">شروط الاستخدام</a> و<a href="#refund">سياسة رسوم الخدمة</a>.</span></label>
   </section>
 
   <div class="bar">
@@ -480,12 +494,75 @@ body.hasnav main.view{padding-bottom:96px}
   </form>
 </main>
 
+<!-- ============ حسابي ============ -->
+<main id="view-account" class="view wrap">
+  <div class="formtop"><h1>حسابي</h1></div>
+  <div style="display:flex;flex-direction:column;gap:16px">
+    <div class="acct"><span class="avatar" id="acAvatar">؟</span><span style="display:flex;flex-direction:column"><b id="acName" style="font-size:16px"></b><span class="meta" id="acEmail"></span></span></div>
+    <form id="acForm" novalidate style="margin:0">
+      <div class="msg" id="acMsg" role="alert"></div>
+      <label class="f">الاسم<input id="acNameIn" type="text" autocomplete="name"></label>
+      <label class="f">رقم الجوال<input id="acPhone" type="tel" inputmode="numeric"><small>ما يظهر لأحد إلا بعد موافقتك ودفع رسوم الخدمة.</small></label>
+      <fieldset><legend>نوع الحساب</legend>
+        <label class="opt"><input type="radio" name="acrole" value="buyer"><span><b>أبحث عن عقار</b></span></label>
+        <label class="opt"><input type="radio" name="acrole" value="owner"><span><b>عندي عقار أعرضه</b></span></label>
+        <label class="opt"><input type="radio" name="acrole" value="both"><span><b>الاثنين</b></span></label>
+      </fieldset>
+      <button type="submit" class="primary" id="acSave">احفظ</button>
+    </form>
+    <div class="menu">
+      <a href="#admin" id="acAdmin" hidden>لوحة الإدارة <span class="badge" id="adminBadge" hidden>0</span></a>
+      <button type="button" id="acPass">تغيير كلمة المرور</button>
+      <a href="#terms">شروط الاستخدام</a>
+      <a href="#privacy">سياسة الخصوصية</a>
+      <a href="#refund">سياسة رسوم الخدمة والاسترداد</a>
+      <button type="button" class="danger" id="acOut">تسجيل الخروج</button>
+    </div>
+  </div>
+</main>
+
+<!-- ============ لوحة الإدارة ============ -->
+<main id="view-admin" class="view wrap">
+  <div class="formtop">
+    <a class="iconbtn" href="#account" aria-label="رجوع"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1B2F5B" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a>
+    <h1>لوحة الإدارة</h1>
+  </div>
+  <div class="seg" id="adTabs"><button type="button" data-ad="open" aria-pressed="true">بلاغات جديدة</button><button type="button" data-ad="hidden" aria-pressed="false">إعلانات مخفية</button></div>
+  <div class="rqlist" id="adList"><p class="meta">جاري التحميل…</p></div>
+</main>
+
+<!-- ============ الصفحات النظامية ============ -->
+<main id="view-terms" class="view wrap legal">
+  <div class="formtop"><a class="iconbtn" href="javascript:history.back()" aria-label="رجوع"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1B2F5B" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a><h1>شروط الاستخدام</h1></div>
+  <p class="draft">مسودة أولية للتجربة. لازم يراجعها محامٍ أو مستشار نظامي قبل الإطلاق.</p>
+  <h2>عن التطبيق</h2><p>«ملاك العقار» منصة يعرض فيها الملاك عقاراتهم للبيع أو الإيجار مباشرة، ويتواصل معهم المهتمون عبر طلبات المعاينة والمحادثة داخل التطبيق.</p>
+  <h2>التزامات المعلن</h2><ul><li>أن يكون مالك العقار أو مفوّضاً نظامياً بعرضه.</li><li>أن تكون بيانات الإعلان وصوره صحيحة ومحدّثة.</li><li>إضافة رقم ترخيص الإعلان العقاري الصادر من الهيئة العامة للعقار.</li><li>تحديث حالة العقار عند حجزه أو بيعه أو تأجيره.</li></ul>
+  <h2>التزامات المستخدم</h2><ul><li>عدم مشاركة أرقام التواصل أو الروابط داخل المحادثة قبل دفع رسوم الخدمة.</li><li>الالتزام بالأدب العام وعدم الإساءة للطرف الآخر.</li><li>عدم استخدام بيانات المالك لغير غرض الصفقة.</li></ul>
+  <h2>المحتوى المخالف</h2><p>للإدارة إخفاء أي إعلان مخالف أو عليه بلاغات صحيحة، وإيقاف الحسابات المخالفة.</p>
+  <h2>حدود المسؤولية</h2><p>المنصة وسيط تقني يربط الطرفين، والتحقق من العقار ووثائقه وإتمام الصفقة مسؤولية الطرفين.</p>
+</main>
+<main id="view-privacy" class="view wrap legal">
+  <div class="formtop"><a class="iconbtn" href="javascript:history.back()" aria-label="رجوع"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1B2F5B" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a><h1>سياسة الخصوصية</h1></div>
+  <p class="draft">مسودة أولية للتجربة. لازم يراجعها محامٍ أو مستشار نظامي قبل الإطلاق.</p>
+  <h2>البيانات اللي نجمعها</h2><ul><li>الاسم والبريد الإلكتروني ورقم الجوال.</li><li>بيانات الإعلانات وصورها.</li><li>طلبات المعاينة والرسائل بين الطرفين.</li><li>سجلات رسوم الخدمة.</li></ul>
+  <h2>من يشوف رقم جوالك</h2><p>رقمك ما يظهر لأي أحد إلا لمن توافق على طلب معاينته ويدفع رسوم الخدمة. وموقع العقار الدقيق حسب اختيارك عند الإعلان.</p>
+  <h2>المحادثات</h2><p>الرسائل محفوظة للطرفين فقط، وتُخفى منها أرقام الجوال والروابط تلقائياً.</p>
+  <h2>حذف البيانات</h2><p>تقدر تحذف إعلاناتك من «عقاراتي»، ولحذف حسابك كاملاً تواصل مع الإدارة.</p>
+</main>
+<main id="view-refund" class="view wrap legal">
+  <div class="formtop"><a class="iconbtn" href="javascript:history.back()" aria-label="رجوع"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1B2F5B" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a><h1>رسوم الخدمة والاسترداد</h1></div>
+  <p class="draft">مسودة أولية للتجربة. لازم يراجعها محامٍ أو مستشار نظامي قبل الإطلاق.</p>
+  <h2>قيمة الرسوم</h2><ul><li>البيع: 1% من سعر العقار المعلن.</li><li>الإيجار: 1% من قيمة الإيجار السنوي.</li></ul>
+  <h2>متى تُدفع</h2><p>بعد موافقة المالك على طلب المعاينة، ويظهر بعدها جوال المالك (والموقع الدقيق إذا كان مقفلاً).</p>
+  <h2>الاسترداد</h2><ul><li>تُسترد كاملة إذا أنهى المالك الصفقة من جهته.</li><li>لا تُسترد إذا انسحب المشتري أو المستأجر بعد الدفع.</li></ul>
+</main>
+
 <nav class="nav" id="nav" aria-label="التنقل الرئيسي">
   <a href="#home" data-nav="home"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11l8-7 8 7"/><path d="M6 10v10h12V10"/></svg>الرئيسية</a>
   <a href="#requests" data-nav="requests"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M8 6h12"/><path d="M8 12h12"/><path d="M8 18h12"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/></svg>طلباتي<span class="badge" id="navBadge" hidden>0</span></a>
   <a href="#add" class="addfab" data-nav="add" aria-label="أضف عقار"><span class="fab"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg></span>أضف عقار</a>
   <a href="#mine" data-nav="mine"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-5h4v5"/></svg>عقاراتي</a>
-  <a href="#home" id="navOut"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M15 4h4v16h-4"/><path d="M10 8l-4 4 4 4"/><path d="M6 12h10"/></svg>خروج</a>
+  <a href="#account" data-nav="account"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>حسابي</a>
 </nav>
 
 <script type="module">
@@ -511,7 +588,10 @@ const $ = (id) => document.getElementById(id);
 /* ---------- التنقل بين الشاشات ---------- */
 function route(){
   const name = (location.hash || "#home").slice(1);
-  let v = ["home","login","signup","add","requests","mine"].includes(name) ? name : "home";
+  let v = ["home","login","signup","add","requests","mine","account","admin","terms","privacy","refund"].includes(name) ? name : "home";
+  if ((v === "account" || v === "admin") && !currentUser) { location.hash = "#login"; return; }
+  if (v === "account") loadAccount();
+  if (v === "admin") loadAdmin();
   if (name.startsWith("edit-")) v = "edit";
   if ((v === "mine" || v === "edit") && !currentUser) { location.hash = "#login"; return; }
   if (v === "mine") loadMine();
@@ -528,7 +608,7 @@ function route(){
   if (v === "add" && !currentUser) { location.hash = "#login"; return; }
   if (v === "add") startAdd();
   document.querySelectorAll(".view").forEach(el => el.classList.toggle("on", el.id === "view-" + v));
-  document.body.classList.toggle("hasnav", !!currentUser && ["home","requests","mine"].includes(v));
+  document.body.classList.toggle("hasnav", !!currentUser && ["home","requests","mine","account"].includes(v));
   document.querySelectorAll("[data-nav]").forEach(a => a.toggleAttribute("aria-current", a.dataset.nav === v));
   document.querySelectorAll("[data-nav][aria-current]").forEach(a => a.setAttribute("aria-current","page"));
   window.scrollTo(0,0);
@@ -873,7 +953,8 @@ async function openListing(id){
   $("detail").innerHTML = `<p class="meta" style="padding:24px 0">جاري تحميل العقار…</p>`;
   try {
     const snap = await getDoc(doc(db, "listings", id));
-    if (!snap.exists() || snap.data().status === "deleted") { $("detail").innerHTML = `<div class="empty" style="margin-top:24px"><p>هذا الإعلان غير موجود أو انحذف.</p><a class="primary" style="display:inline-flex;align-items:center;padding:0 20px;text-decoration:none" href="#home">ارجع للعروض</a></div>`; return; }
+    const hiddenForMe = snap.exists() && snap.data().status === "hidden" && !(currentUser && (currentUser.uid === snap.data().ownerId || IS_ADMIN));
+    if (!snap.exists() || snap.data().status === "deleted" || hiddenForMe) { $("detail").innerHTML = `<div class="empty" style="margin-top:24px"><p>هذا الإعلان غير موجود أو انحذف.</p><a class="primary" style="display:inline-flex;align-items:center;padding:0 20px;text-decoration:none" href="#home">ارجع للعروض</a></div>`; return; }
     D = { id, ...snap.data() };
     const ph = await getDocs(query(collection(db, "listings", id, "photos"), orderBy("order")));
     D.photoList = ph.docs.map(d => d.data().data).filter(p => typeof p === "string" && p.startsWith("data:image/"));
@@ -925,8 +1006,18 @@ function renderDetail(){
     <div class="facts">${facts}</div>
     ${l.description ? `<div><h2 style="font-size:16px;line-height:26px;margin-bottom:6px">الوصف</h2><p class="desc">${esc(l.description)}</p></div>` : ""}
     ${video}${publicMap}
+    ${l.status === "hidden" ? '<div class="status no">هذا الإعلان مخفي من الإدارة.</div>' : ""}
     ${contactBox(l, fee)}
     ${actionBox(l, fee)}
+    ${currentUser && !D.mine ? `<details class="report"><summary>إبلاغ عن الإعلان</summary>
+      <fieldset style="margin-top:6px">
+        <label class="opt"><input type="radio" name="rep" value="معلومات غير صحيحة" checked><span><b>معلومات أو صور غير صحيحة</b></span></label>
+        <label class="opt"><input type="radio" name="rep" value="المعلن ليس المالك"><span><b>المعلن مو المالك</b></span></label>
+        <label class="opt"><input type="radio" name="rep" value="إعلان مكرر"><span><b>إعلان مكرر</b></span></label>
+        <label class="opt"><input type="radio" name="rep" value="محتوى غير لائق"><span><b>محتوى غير لائق</b></span></label>
+      </fieldset>
+      <label class="f" style="margin-top:10px">تفاصيل (اختياري)<input id="repNote" type="text" maxlength="200"></label>
+      <button type="button" class="ghost" id="repSend" style="margin-top:10px;width:100%">أرسل البلاغ</button></details>` : ""}
   </div>`;
 
   const gal = $("gal");
@@ -997,6 +1088,16 @@ function wireActions(l){
       await setDoc(doc(db, "viewingRequests", `${l.id}_${currentUser.uid}`), data);
       D.req = data; renderDetail();
     } catch(err){ console.error(err); show(msgEl, "ما قدرنا نرسل الطلب. جرّب مرة ثانية."); send.disabled = false; send.textContent = "أرسل طلب المعاينة"; }
+  });
+  const rep = $("repSend");
+  if (rep) rep.addEventListener("click", async () => {
+    rep.disabled = true;
+    try {
+      await addDoc(collection(db, "reports"), { listingId: l.id, listingTitle: l.title, listingNumber: l.number,
+        reporterId: currentUser.uid, reason: document.querySelector('input[name="rep"]:checked').value,
+        note: scrub($("repNote").value.trim()), status: "open", createdAt: serverTimestamp() });
+      rep.closest("details").outerHTML = '<div class="status ok">وصل بلاغك للإدارة. شكراً لك.</div>';
+    } catch(err){ console.error(err); alert("ما انرسل البلاغ. جرّب مرة ثانية."); rep.disabled = false; }
   });
   const cancel = $("rCancel");
   if (cancel) cancel.addEventListener("click", async () => {
@@ -1226,7 +1327,7 @@ async function openPay(reqId){
 
 
 /* ---------- عقاراتي ---------- */
-$("navOut").addEventListener("click", async (e) => { e.preventDefault(); if (confirm("تبي تسجّل خروج؟")) { await signOut(auth); location.hash = "#home"; } });
+
 let MINE = [];
 const listStName = { active:"متاح", reserved:"محجوز", closed:"مباع / مؤجر" };
 async function loadMine(){
@@ -1242,6 +1343,9 @@ function drawMine(){
   if (!MINE.length){ $("mineList").innerHTML = `<div class="empty"><p>ما أضفت أي عقار للحين.</p><a class="primary" style="display:inline-flex;align-items:center;padding:0 20px;text-decoration:none" href="#add">أضف عقارك</a></div>`; return; }
   $("mineList").innerHTML = MINE.map(l => {
     const st = l.status || "active";
+    if (st === "hidden") return `<article class="mine"><a class="minetop" href="#listing-${esc(l.id)}">${l.thumb ? `<img src="${l.thumb}" alt="">` : `<span class="noimg">${houseIcon}</span>`}
+        <span class="t"><b>${esc(l.title)}</b><span class="meta">إعلان ${esc(l.number)}</span><span class="pill hid" style="align-self:flex-start">مخفي من الإدارة</span></span></a>
+        <div class="minebody"><p class="meta" style="margin:0">أخفت الإدارة هذا الإعلان بسبب بلاغ. تواصل مع الإدارة لمراجعته.</p></div></article>`;
     const seg = ["active","reserved","closed"].map(k => `<button type="button" data-lst="${k}" data-id="${esc(l.id)}" aria-pressed="${st === k}">${k === "closed" ? (l.deal === "rent" ? "مؤجر" : "مباع") : listStName[k]}</button>`).join("");
     return `<article class="mine">
       <a class="minetop" href="#listing-${esc(l.id)}">${l.thumb ? `<img src="${l.thumb}" alt="">` : `<span class="noimg">${houseIcon}</span>`}
@@ -1315,6 +1419,103 @@ $("editForm").addEventListener("submit", async (e) => {
     setTimeout(() => { location.hash = "#mine"; }, 700);
   } catch(err){ console.error(err); show(m, "ما قدرنا نحفظ التعديلات. جرّب مرة ثانية."); }
   btn.disabled = false; btn.textContent = "احفظ التعديلات";
+});
+
+
+/* ---------- حسابي ---------- */
+let IS_ADMIN = false;
+async function checkAdmin(){
+  IS_ADMIN = false;
+  if (!currentUser) return;
+  try { IS_ADMIN = (await getDoc(doc(db, "admins", currentUser.uid))).exists(); } catch(e){}
+  $("acAdmin").hidden = !IS_ADMIN;
+}
+async function loadAccount(){
+  $("acMsg").className = "msg";
+  const u = currentUser;
+  $("acName").textContent = u.displayName || ""; $("acEmail").textContent = u.email || "";
+  $("acAvatar").textContent = (u.displayName || "؟").trim().charAt(0);
+  $("acNameIn").value = u.displayName || "";
+  try {
+    const [p, d] = await Promise.all([getDoc(doc(db, "users", u.uid, "private", "contact")), getDoc(doc(db, "users", u.uid))]);
+    $("acPhone").value = p.exists() ? (p.data().phone || "") : "";
+    const role = d.exists() ? (d.data().role || "buyer") : "buyer";
+    document.querySelector(`input[name="acrole"][value="${role}"]`).checked = true;
+  } catch(e){ console.error(e); }
+  await checkAdmin();
+  if (IS_ADMIN) { try { const n = (await getDocs(query(collection(db, "reports"), where("status", "==", "open")))).size; $("adminBadge").hidden = !n; $("adminBadge").textContent = n; } catch(e){} }
+}
+$("acForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const m = $("acMsg"), name = $("acNameIn").value.trim(), phone = digits($("acPhone").value);
+  const role = document.querySelector('input[name="acrole"]:checked')?.value || "buyer";
+  if (name.length < 2) return show(m, "اكتب اسمك.");
+  if (!/^05\d{8}$/.test(phone)) return show(m, "رقم الجوال لازم يبدأ بـ05 ويتكون من 10 أرقام.");
+  $("acSave").disabled = true;
+  try {
+    await updateProfile(currentUser, { displayName: name });
+    await setDoc(doc(db, "users", currentUser.uid), { name, role }, { merge: true });
+    await setDoc(doc(db, "users", currentUser.uid, "private", "contact"), { phone });
+    $("acName").textContent = name; $("acAvatar").textContent = name.charAt(0);
+    show(m, "انحفظت بياناتك. رقم الجوال في إعلاناتك الحالية تعدّله من «عقاراتي».", true);
+  } catch(err){ console.error(err); show(m, "ما قدرنا نحفظ. جرّب مرة ثانية."); }
+  $("acSave").disabled = false;
+});
+$("acPass").addEventListener("click", async () => {
+  try { await sendPasswordResetEmail(auth, currentUser.email); show($("acMsg"), "أرسلنا لك رابط تغيير كلمة المرور على بريدك.", true); }
+  catch(err){ show($("acMsg"), errText(err.code)); }
+});
+$("acOut").addEventListener("click", async () => { if (confirm("تبي تسجّل خروج؟")) { await signOut(auth); location.hash = "#home"; } });
+
+/* ---------- لوحة الإدارة ---------- */
+let AD = { tab:"open" };
+async function loadAdmin(){
+  await checkAdmin();
+  if (!IS_ADMIN) { $("adList").innerHTML = `<div class="empty"><p>هذي الصفحة للإدارة فقط.</p></div>`; return; }
+  $("adList").innerHTML = `<p class="meta">جاري التحميل…</p>`;
+  try {
+    if (AD.tab === "open"){
+      const snap = await getDocs(query(collection(db, "reports"), where("status", "==", "open")));
+      const reps = snap.docs.map(d => ({ id:d.id, ...d.data() })).sort((a,b) => (b.createdAt?.seconds||0) - (a.createdAt?.seconds||0));
+      $("adList").innerHTML = reps.length ? reps.map(r => `<article class="rq">
+        <div class="rqhead"><span class="who"><b>${esc(r.reason)}</b><span class="meta">${whenText(r.createdAt)}</span></span><span class="pill wait">جديد</span></div>
+        <a class="meta" href="#listing-${esc(r.listingId)}">${esc(r.listingTitle)} · إعلان ${esc(r.listingNumber)}</a>
+        ${r.note ? `<p class="rqmsg">${esc(r.note)}</p>` : ""}
+        <div class="rqact"><button type="button" class="btn-no" data-hide="${esc(r.listingId)}" data-rep="${esc(r.id)}">أخفِ الإعلان</button>
+          <button type="button" class="ghost" data-dismiss="${esc(r.id)}">تجاهل البلاغ</button></div></article>`).join("")
+        : `<div class="empty"><p>ما فيه بلاغات جديدة.</p></div>`;
+    } else {
+      const snap = await getDocs(query(collection(db, "listings"), where("status", "==", "hidden")));
+      const ls = snap.docs.map(d => ({ id:d.id, ...d.data() }));
+      $("adList").innerHTML = ls.length ? ls.map(l => `<article class="rq">
+        <a class="meta" href="#listing-${esc(l.id)}"><b style="color:var(--ink)">${esc(l.title)}</b> · إعلان ${esc(l.number)}</a>
+        <div class="rqact"><button type="button" class="btn-ok" data-unhide="${esc(l.id)}">أظهر الإعلان</button></div></article>`).join("")
+        : `<div class="empty"><p>ما فيه إعلانات مخفية.</p></div>`;
+    }
+  } catch(err){ console.error(err); $("adList").innerHTML = `<div class="empty"><p>ما قدرنا نحمّل البيانات. تأكد إنك حدّثت القواعد.</p></div>`; }
+}
+$("adTabs").addEventListener("click", (e) => {
+  const b = e.target.closest("button"); if (!b) return;
+  AD.tab = b.dataset.ad;
+  $("adTabs").querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x === b));
+  loadAdmin();
+});
+$("adList").addEventListener("click", async (e) => {
+  const h = e.target.closest("[data-hide]"), d = e.target.closest("[data-dismiss]"), u = e.target.closest("[data-unhide]");
+  try {
+    if (h){
+      if (!confirm("تخفي هذا الإعلان عن الكل؟")) return;
+      const batch = writeBatch(db);
+      batch.update(doc(db, "listings", h.dataset.hide), { status: "hidden" });
+      batch.update(doc(db, "reports", h.dataset.rep), { status: "resolved", action: "hidden" });
+      await batch.commit();
+    } else if (d){
+      await updateDoc(doc(db, "reports", d.dataset.dismiss), { status: "resolved", action: "dismissed" });
+    } else if (u){
+      await updateDoc(doc(db, "listings", u.dataset.unhide), { status: "active" });
+    } else return;
+    loadAdmin(); loadListings();
+  } catch(err){ console.error(err); alert("ما تم الإجراء. تأكد إنك حدّثت القواعد."); }
 });
 
 function resetAdd(){
