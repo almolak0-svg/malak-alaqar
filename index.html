@@ -39,6 +39,18 @@ a{color:var(--brand)}
 
 /* home */
 .hello{margin:8px 0 14px}
+.todo{background:var(--raised);border:1px solid var(--line);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
+.todo h2{font-size:15px;margin:0;display:flex;align-items:center;gap:8px}
+.tditem{display:flex;flex-direction:column;gap:8px;padding:10px 12px;border-radius:12px;background:#FFF8EC;border:1px solid #F3E2C2;text-decoration:none;color:var(--ink);font-size:14px;line-height:22px}
+.tditem.blue{background:#E9F5F4;border-color:#CDE8E6}
+.tditem b{font-weight:700}
+.notary{display:flex;flex-direction:column;gap:10px;padding:14px;border-radius:14px;background:#F3EAD8;border:1px solid #E8D6B3}
+.notary b{color:var(--gold-text);font-size:15px}
+.notary p{margin:0;font-size:13px;color:var(--ink);line-height:21px}
+.nbtns{display:flex;gap:8px}
+.nbtns a{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;height:46px;border-radius:12px;font-weight:700;font-size:14px;text-decoration:none}
+.nbtns .wa{background:#1F9D55;color:#fff}.nbtns .call{background:var(--raised);color:var(--brand);border:1px solid var(--brand)}
+.tditem .go{color:var(--brand);font-weight:700;font-size:13px}
 .hello p{margin:0;font-size:13px;color:var(--muted)}
 .hello h1{font-size:22px;line-height:34px;margin-top:2px}
 .search{display:flex;align-items:center;gap:8px;height:48px;padding:0 14px;border-radius:12px;border:1px solid var(--line);background:var(--raised)}
@@ -266,6 +278,7 @@ details.report summary{min-height:44px;display:flex;align-items:center;color:var
     <p id="helloName">مرحباً بك</p>
     <h1>عقارك من مالكه… مباشرة</h1>
   </section>
+  <section class="todo" id="todo" hidden aria-live="polite"></section>
   <div class="searchrow">
   <label class="search">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5B6478" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>
@@ -399,6 +412,7 @@ details.report summary{min-height:44px;display:flex;align-items:center;color:var
     </div>
     <label class="f"><span id="priceLabel">السعر (ريال)</span><input id="aPrice" type="text" inputmode="numeric" placeholder="مثال: 850000"></label>
     <label class="check"><input id="aNeg" type="checkbox" checked>السعر قابل للتفاوض</label>
+    <label class="check"><input id="aAuto" type="checkbox"><span>اقبل طلبات المعاينة تلقائياً<br><small class="meta">يختصر خطوة: المشتري يحوّل الرسوم على طول بدون انتظار موافقتك.</small></span></label>
     <div class="row2">
       <label class="f">المدينة<input id="aCity" type="text" placeholder="الرياض"></label>
       <label class="f">الحي<input id="aDistrict" type="text" placeholder="حي الياسمين"></label>
@@ -556,6 +570,7 @@ details.report summary{min-height:44px;display:flex;align-items:center;color:var
     </div>
     <label class="f"><span id="ePriceLabel">السعر (ريال)</span><input id="ePrice" type="text" inputmode="numeric"></label>
     <label class="check"><input id="eNeg" type="checkbox">السعر قابل للتفاوض</label>
+    <label class="check"><input id="eAuto" type="checkbox"><span>اقبل طلبات المعاينة تلقائياً<br><small class="meta">المشتري يحوّل الرسوم على طول بدون انتظار موافقتك.</small></span></label>
     <label class="f">الوصف<textarea id="eDesc" class="ta" maxlength="1000"></textarea></label>
     <label class="f">رابط فيديو (اختياري)<input id="eVideo" type="url" placeholder="رابط يوتيوب أو تيك توك"></label>
     <label class="f">رقم ترخيص الإعلان العقاري<input id="eLicense" type="text" inputmode="numeric"></label>
@@ -611,6 +626,7 @@ details.report summary{min-height:44px;display:flex;align-items:center;color:var
       <a href="#refund">سياسة رسوم الخدمة والاسترداد</a>
       <button type="button" class="danger" id="acOut">تسجيل الخروج</button>
     </div>
+    <p class="meta center" style="margin:0">الإصدار 1.7</p>
   </div>
 </main>
 
@@ -626,7 +642,7 @@ details.report summary{min-height:44px;display:flex;align-items:center;color:var
     <a class="iconbtn" href="#account" aria-label="رجوع"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1B2F5B" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a>
     <h1>لوحة الإدارة</h1>
   </div>
-  <div class="seg" id="adTabs"><button type="button" data-ad="pay" aria-pressed="true">التحويلات</button><button type="button" data-ad="rec" aria-pressed="false">الاستعادة</button><button type="button" data-ad="open" aria-pressed="false">البلاغات</button><button type="button" data-ad="hidden" aria-pressed="false">المخفية</button><button type="button" data-ad="bank" aria-pressed="false">الحساب</button></div>
+  <div class="seg" id="adTabs"><button type="button" data-ad="pay" aria-pressed="true">التحويلات</button><button type="button" data-ad="rec" aria-pressed="false">الاستعادة</button><button type="button" data-ad="open" aria-pressed="false">البلاغات</button><button type="button" data-ad="hidden" aria-pressed="false">المخفية</button><button type="button" data-ad="deleted" aria-pressed="false">المحذوفة</button><button type="button" data-ad="bank" aria-pressed="false">الحساب</button></div>
   <div class="rqlist" id="adList"><p class="meta">جاري التحميل…</p></div>
 </main>
 
@@ -692,6 +708,7 @@ function route(){
   if (v === "favs") loadFavs();
   if ((v === "account" || v === "admin") && !currentUser) { location.hash = "#login"; return; }
   if (v === "account") loadAccount();
+  if (v === "home") autoRefresh(false);
   if (v === "admin") loadAdmin();
   if (name.startsWith("edit-")) v = "edit";
   if ((v === "mine" || v === "edit") && !currentUser) { location.hash = "#login"; return; }
@@ -727,14 +744,14 @@ onAuthStateChanged(auth, (user) => {
   if (user){
     $("helloName").textContent = "مرحباً " + (user.displayName || "");
     btn.textContent = "خروج"; btn.href = "#home";
-    $("reqBtn").hidden = true; btn.hidden = true; loadUserDoc().then(() => { refreshBadge(); render(); }); checkAdmin();
+    $("reqBtn").hidden = true; btn.hidden = true; Promise.all([loadUserDoc(), loadNotary()]).then(() => { refreshBadge(); render(); }); checkAdmin();
     btn.onclick = async (e) => { e.preventDefault(); await signOut(auth); };
     if (["#login","#signup","#forgot"].includes(location.hash)) location.hash = "#home";
     syncIndex(user);
   } else {
     $("helloName").textContent = "مرحباً بك";
     btn.textContent = "دخول"; btn.href = "#login"; btn.onclick = null;
-    $("reqBtn").hidden = true; btn.hidden = false; USERDOC = { favs: [], chatRead: {} }; render();
+    $("reqBtn").hidden = true; btn.hidden = false; USERDOC = { favs: [], chatRead: {} }; render(); IS_ADMIN = false; R.owner = []; R.buyer = []; drawTodo();
   }
 });
 
@@ -970,7 +987,7 @@ drawPhotos();
 function readForm(){
   return {
     type: $("aType").value, deal: A.deal,
-    price: +digits($("aPrice").value), negotiable: $("aNeg").checked,
+    price: +digits($("aPrice").value), negotiable: $("aNeg").checked, autoApprove: $("aAuto").checked,
     city: $("aCity").value.trim(), district: $("aDistrict").value.trim(),
     area: +digits($("aArea").value) || 0, age: digits($("aAge").value) === "" ? null : +digits($("aAge").value),
     rooms: isLand() ? 0 : A.rooms, baths: isLand() ? 0 : A.baths,
@@ -1173,7 +1190,7 @@ function actionBox(l, fee){
   if (!currentUser) return `<a class="primary" style="display:flex;align-items:center;justify-content:center;text-decoration:none" href="#login">سجّل دخولك لطلب معاينة</a>`;
   const r = D.req;
   if (!r) return `<div class="box" id="reqBox"><h2>طلب معاينة</h2>
-      <p>اقترح وقت يناسبك، والمالك يرد عليك هنا.</p>
+      <p>${l.autoApprove ? "المالك يقبل طلبات المعاينة تلقائياً: بعد ما ترسل طلبك تحوّل الرسوم على طول ويظهر لك جواله بعد التأكيد." : "اقترح وقت يناسبك، والمالك يرد عليك هنا."}</p>
       <label class="f">الوقت المناسب لك<input id="rTime" type="text" maxlength="60" placeholder="مثال: الخميس بعد العصر"></label>
       <label class="f">رسالة للمالك (اختياري)<textarea id="rMsg" class="ta" style="min-height:90px" maxlength="300" placeholder="عرّف بنفسك أو اسأل عن العقار. أرقام الجوال والروابط ما تنرسل."></textarea></label>
       <div class="msg" id="rErr" role="alert"></div>
@@ -1189,7 +1206,7 @@ function actionBox(l, fee){
       <a class="primary" style="display:flex;align-items:center;justify-content:center;text-decoration:none" href="#pay-${esc(rid)}">ادفع ${num(fee)} ريال وأظهر الجوال</a>
       ${chatBtn}
       <p class="meta" style="margin:0">في الإيجار تُحسب النسبة من الإيجار السنوي. تُسترد كاملة إذا أنهى المالك الصفقة، ولا تُسترد إذا انسحب المشتري.</p>`;
-  if (r.status === "paid") return `<div class="status ok">تأكد تحويلك، وصارت بيانات المالك ظاهرة لك فوق.</div>${chatBtn}`;
+  if (r.status === "paid") return `<div class="status ok">تأكد تحويلك، وصارت بيانات المالك ظاهرة لك فوق.</div>${notaryBox(l.number)}${chatBtn}`;
   if (r.status === "ownerCancelled") return `<div class="status no">ألغى المالك الصفقة، وتُرد لك رسوم الخدمة كاملة.</div>`;
   return "";
 }
@@ -1244,8 +1261,9 @@ function wireActions(l){
       const data = { listingId: l.id, ownerId: l.ownerId, buyerId: currentUser.uid,
         buyerName: currentUser.displayName || "", listingTitle: l.title, listingNumber: l.number,
         proposedTime: time, message: $("rMsg").value.trim(),
-        status: "pending", createdAt: serverTimestamp() };
+        status: l.autoApprove ? "approved" : "pending", createdAt: serverTimestamp() };
       await setDoc(doc(db, "viewingRequests", `${l.id}_${currentUser.uid}`), data);
+      if (l.autoApprove) { refreshBadge(); location.hash = `#pay-${l.id}_${currentUser.uid}`; return; }
       D.req = data; renderDetail();
     } catch(err){ console.error(err); show(msgEl, "ما قدرنا نرسل الطلب. جرّب مرة ثانية."); send.disabled = false; send.textContent = "أرسل طلب المعاينة"; }
   });
@@ -1291,9 +1309,74 @@ async function refreshBadge(){
   } catch(e){ console.error(e); }
 }
 function setNavBadge(){
-  const n = R.owner.filter(r => r.status === "pending").length + [...R.owner, ...R.buyer].filter(isUnread).length;
+  const n = R.owner.filter(r => r.status === "pending").length
+    + R.buyer.filter(r => r.status === "approved").length
+    + [...R.owner, ...R.buyer].filter(isUnread).length;
   $("reqBadge").hidden = !n; $("reqBadge").textContent = n; $("navBadge").hidden = !n; $("navBadge").textContent = n;
+  drawTodo();
 }
+
+/* ---------- المطلوب منك (تنبيهات داخل التطبيق) ---------- */
+let ADMIN_TODO = { pay:0, rec:0, rep:0 };
+const recent = (ts, days) => ts?.seconds && (Date.now() / 1000 - ts.seconds) < days * 86400;
+function drawTodo(){
+  const box = $("todo");
+  if (!currentUser) { box.hidden = true; return; }
+  const items = [];
+  const t = (r) => `«${esc(r.listingTitle || "")}»`;
+  R.owner.filter(r => r.status === "pending").forEach(r => items.push(`<div class="tditem">
+    <span><b>${esc(r.buyerName || "مشتري")}</b> يبي يعاين ${t(r)} — الوقت المقترح: ${esc(r.proposedTime)}</span>
+    <div class="rqact"><button type="button" class="btn-ok" data-tact="approved" data-id="${esc(r.id)}">وافق</button>
+      <button type="button" class="btn-no" data-tact="rejected" data-id="${esc(r.id)}">اعتذر</button></div></div>`));
+  R.buyer.filter(r => r.status === "approved").forEach(r => items.push(`<a class="tditem" href="#pay-${esc(r.id)}">
+    <span>${r.payNote ? `ما تأكد تحويلك على ${t(r)}: ${esc(r.payNote)}` : `وافق المالك على معاينة ${t(r)}. حوّل رسوم الخدمة ويظهر لك جواله.`}</span>
+    <span class="go">${r.payNote ? "ارفع إيصال جديد" : "ادفع الحين"} ←</span></a>`));
+  R.buyer.filter(r => r.status === "paid" && recent(r.paidAt, 3)).forEach(r => items.push(`<a class="tditem blue" href="#listing-${esc(r.listingId)}">
+    <span>تأكد تحويلك على ${t(r)}. جوال المالك صار ظاهر لك، تواصل معه ورتّب المعاينة.</span><span class="go">اعرض الجوال ←</span></a>`));
+  R.owner.filter(r => r.status === "paid" && recent(r.paidAt, 3)).forEach(r => items.push(`<a class="tditem blue" href="#chat-${esc(r.id)}">
+    <span><b>${esc(r.buyerName || "المشتري")}</b> دفع الرسوم على ${t(r)}، وبيتواصل معك على جوالك.</span><span class="go">المحادثة ←</span></a>`));
+  [...R.owner, ...R.buyer].filter(isUnread).forEach(r => items.push(`<a class="tditem blue" href="#chat-${esc(r.id)}">
+    <span>رسالة جديدة في ${t(r)}</span><span class="go">افتح المحادثة ←</span></a>`));
+  if (IS_ADMIN){
+    const a = [];
+    if (ADMIN_TODO.pay) a.push(`${ADMIN_TODO.pay} تحويل بانتظار التأكيد`);
+    if (ADMIN_TODO.rec) a.push(`${ADMIN_TODO.rec} طلب استعادة حساب`);
+    if (ADMIN_TODO.rep) a.push(`${ADMIN_TODO.rep} بلاغ جديد`);
+    if (a.length) items.unshift(`<a class="tditem" href="#admin"><span><b>الإدارة:</b> ${a.join("، ")}</span><span class="go">لوحة الإدارة ←</span></a>`);
+  }
+  box.hidden = !items.length;
+  box.innerHTML = `<h2>المطلوب منك <span class="badge">${items.length}</span></h2>${items.slice(0, 6).join("")}
+    ${items.length > 6 ? `<a class="link" href="#requests">عرض الكل (${items.length})</a>` : ""}`;
+  document.title = items.length ? `(${items.length}) ملاك العقار` : "ملاك العقار";
+  try { if (navigator.setAppBadge) items.length ? navigator.setAppBadge(items.length) : navigator.clearAppBadge(); } catch(e){}
+}
+$("todo").addEventListener("click", (e) => {
+  const b = e.target.closest("[data-tact]"); if (!b) return;
+  respondReq(b.dataset.id, b.dataset.tact, b);
+});
+async function refreshAdminTodo(){
+  if (!IS_ADMIN) return;
+  try {
+    const [p, r, x] = await Promise.all([
+      getDocs(query(collection(db, "payments"), where("status", "==", "pending"))),
+      getDocs(query(collection(db, "recoveryRequests"), where("status", "in", ["open", "approved"]))),
+      getDocs(query(collection(db, "reports"), where("status", "==", "open")))]);
+    ADMIN_TODO = { pay: p.size, rec: r.size, rep: x.size };
+    const n = p.size + r.size + x.size;
+    $("adminBadge").hidden = !n; $("adminBadge").textContent = n;
+    drawTodo();
+  } catch(e){ console.warn("adminTodo", e); }
+}
+// تحديث تلقائي كل دقيقة وعند الرجوع للتطبيق
+let lastRefresh = 0;
+function autoRefresh(force){
+  if (!currentUser || document.hidden) return;
+  if (!force && Date.now() - lastRefresh < 55000) return;
+  lastRefresh = Date.now();
+  refreshBadge(); refreshAdminTodo();
+}
+setInterval(() => autoRefresh(false), 60000);
+document.addEventListener("visibilitychange", () => autoRefresh(true));
 async function loadRequests(){
   $("rqList").innerHTML = `<p class="meta">جاري تحميل الطلبات…</p>`;
   try {
@@ -1327,6 +1410,7 @@ function ownerCard(r){
   if (["approved","paySubmitted","paid"].includes(r.status)) acts = `<div class="rqact">
       <button type="button" class="btn-no" data-act="ownerCancelled" data-id="${esc(r.id)}">إنهاء الصفقة من جهتي</button></div>`;
   acts += `<a class="secondary" href="#chat-${esc(r.id)}">المحادثة${isUnread(r) ? ' <span class="pill new">رسالة جديدة</span>' : ""}</a>`;
+  if (r.status === "paid") acts += notaryBox(r.listingNumber);
   return `<article class="rq">
     <div class="rqhead"><span class="avatar">${esc(name.trim().charAt(0) || "؟")}</span>
       <span class="who"><b>${esc(name)}</b><span class="meta">${whenText(r.createdAt)}</span></span>
@@ -1347,7 +1431,7 @@ function buyerCard(r){
       <span class="pill ${stClass[r.status] || "wait"}">${stName[r.status] || r.status}</span></div>
     <div style="font-size:14px">الوقت اللي اقترحته: <b>${esc(r.proposedTime)}</b></div>
     <p class="meta" style="margin:0">${hint}</p>
-    <a class="secondary" href="#listing-${esc(r.listingId)}">افتح الإعلان</a>${chat}</article>`;
+    <a class="secondary" href="#listing-${esc(r.listingId)}">افتح الإعلان</a>${chat}${r.status === "paid" ? notaryBox(r.listingNumber) : ""}</article>`;
 }
 $("rqSide").addEventListener("click", (e) => {
   const b = e.target.closest("button"); if (!b) return;
@@ -1361,21 +1445,23 @@ $("rqStatus").addEventListener("click", (e) => {
   $("rqStatus").querySelectorAll("button").forEach(x => x.setAttribute("aria-pressed", x === b));
   drawRequests();
 });
-$("rqList").addEventListener("click", async (e) => {
-  const b = e.target.closest("[data-act]"); if (!b) return;
-  const act = b.dataset.act;
+async function respondReq(id, act, btn){
   if (act === "rejected" && !confirm("تبي تعتذر عن هذا الطلب؟")) return;
   if (act === "ownerCancelled" && !confirm("إنهاء الصفقة من جهتك يقفل بياناتك عن المشتري، وتُرد له رسوم الخدمة كاملة إذا كان دفع. تكمل؟")) return;
-  b.disabled = true;
+  if (btn) btn.disabled = true;
   try {
-    await updateDoc(doc(db, "viewingRequests", b.dataset.id), { status: act, respondedAt: serverTimestamp() });
-    const r = R.owner.find(x => x.id === b.dataset.id); if (r) r.status = act;
+    await updateDoc(doc(db, "viewingRequests", id), { status: act, respondedAt: serverTimestamp() });
+    const r = R.owner.find(x => x.id === id); if (r) r.status = act;
     const n = R.owner.filter(r => r.status === "pending").length;
-    $("reqBadge").hidden = !n; $("reqBadge").textContent = n; $("navBadge").hidden = !n; $("navBadge").textContent = n;
     $("rqSide").querySelector('[data-side="owner"]').innerHTML = `على عقاراتي${n ? ` <span class="badge">${n}</span>` : ""}`;
-    drawRequests();
-  } catch(err){ console.error(err); alert("ما قدرنا نحفظ ردك. جرّب مرة ثانية."); b.disabled = false; }
+    setNavBadge(); drawRequests();
+  } catch(err){ console.error(err); alert("ما قدرنا نحفظ ردك. جرّب مرة ثانية."); if (btn) btn.disabled = false; }
+}
+$("rqList").addEventListener("click", (e) => {
+  const b = e.target.closest("[data-act]"); if (!b) return;
+  respondReq(b.dataset.id, b.dataset.act, b);
 });
+
 
 
 /* ---------- المحادثة ---------- */
@@ -1413,6 +1499,7 @@ function drawChat(msgs){
       <p>حوّل رسوم الخدمة 1% وارفع الإيصال، ويظهر لك جوال المالك بعد تأكيد التحويل.</p>
       <a class="primary" style="display:flex;align-items:center;justify-content:center;text-decoration:none" href="#pay-${esc(reqId)}">ادفع وأظهر الجوال</a></div>`;
   if (!iAmOwner && req.status === "paySubmitted") html += `<p class="sys">أرسلت إيصال التحويل، والإدارة تراجعه.</p>`;
+  if (req.status === "paid") html += notaryBox(req.listingNumber);
   if (req.status === "rejected") html += `<p class="sys">اعتذر المالك عن هذا الطلب.</p>`;
   if (req.status === "ownerCancelled") html += `<p class="sys">ألغى المالك الصفقة.</p>`;
   $("chatList").innerHTML = html;
@@ -1577,7 +1664,29 @@ async function loadAdminBank(){
     <label class="f">رقم STC Pay (اختياري)<input id="bkStc" type="text" inputmode="numeric" maxlength="15" dir="ltr" value="${esc(b.stcpay || "")}"></label>
     <label class="f">ملاحظة للمشتري (اختياري)<input id="bkNote" type="text" maxlength="150" value="${esc(b.note || "")}" placeholder="مثال: اكتب رقم الإعلان في وصف التحويل"></label>
     <div class="msg" id="bkMsg" role="alert"></div>
-    <button type="button" class="primary" id="bkSave">احفظ</button></div>`;
+    <button type="button" class="primary" id="bkSave">احفظ</button></div>
+  <div class="box" style="margin-top:16px">
+    <h2>الموثق</h2>
+    <p class="meta" style="margin:0">يظهر زر التواصل مع الموثق للمشتري والمالك بعد تأكيد الدفع فقط.</p>
+    <label class="f">اسم الموثق أو المكتب<input id="ntName" type="text" maxlength="60"></label>
+    <label class="f">رقم الاتصال<input id="ntPhone" type="tel" inputmode="numeric" maxlength="15" dir="ltr" placeholder="05xxxxxxxx"></label>
+    <label class="f">رقم الواتساب (إذا كان غير رقم الاتصال)<input id="ntWa" type="tel" inputmode="numeric" maxlength="15" dir="ltr" placeholder="اتركه فاضي إذا نفس الرقم"></label>
+    <label class="f">ملاحظة تظهر للعميل (اختياري)<input id="ntNote" type="text" maxlength="150" placeholder="مثال: لإكمال الإفراغ أو توثيق عقد الإيجار"></label>
+    <div class="msg" id="ntMsg" role="alert"></div>
+    <button type="button" class="primary" id="ntSave">احفظ بيانات الموثق</button></div>`;
+  await loadNotary();
+  const n = NOTARY || {};
+  $("ntName").value = n.name || ""; $("ntPhone").value = n.phone || ""; $("ntWa").value = n.whatsapp || ""; $("ntNote").value = n.note || "";
+  $("ntSave").addEventListener("click", async () => {
+    const m = $("ntMsg"), phone = toDigits($("ntPhone").value), wa = toDigits($("ntWa").value);
+    if (!/^0\d{8,9}$|^9665\d{8}$|^800\d{7}$|^92\d{7}$/.test(phone)) return show(m, "اكتب رقم الاتصال بشكل صحيح (مثال: 05xxxxxxxx).");
+    if (wa && !/^05\d{8}$|^9665\d{8}$/.test(wa)) return show(m, "رقم الواتساب لازم يكون جوال (05xxxxxxxx).");
+    try {
+      await setDoc(doc(db, "settings", "notary"), { name: $("ntName").value.trim(), phone, whatsapp: wa, note: $("ntNote").value.trim(), updatedAt: serverTimestamp() });
+      await loadNotary();
+      show(m, "انحفظت بيانات الموثق.", true);
+    } catch(err){ console.error(err); show(m, "ما انحفظت. تأكد إنك حدّثت القواعد."); }
+  });
   $("bkSave").addEventListener("click", async () => {
     const iban = $("bkIban").value.replace(/\s/g, "").toUpperCase(), stc = digits($("bkStc").value), m = $("bkMsg");
     if (!iban && !stc) return show(m, "اكتب الآيبان أو رقم STC Pay على الأقل.");
@@ -1675,7 +1784,7 @@ async function openEdit(id){
     const priv = p.exists() ? p.data() : {};
     $("eNum").textContent = `إعلان ${E.number}`;
     $("ePriceLabel").textContent = E.deal === "rent" ? "الإيجار السنوي (ريال)" : "السعر (ريال)";
-    $("eTitle").value = E.title || ""; $("ePrice").value = E.price || ""; $("eNeg").checked = !!E.negotiable;
+    $("eTitle").value = E.title || ""; $("ePrice").value = E.price || ""; $("eNeg").checked = !!E.negotiable; $("eAuto").checked = !!E.autoApprove;
     if (!$("eType").options.length) $("eType").innerHTML = $("aType").innerHTML;
     $("eType").value = E.type || ""; setEDeal(E.deal || "sale");
     $("eCity").value = E.city || ""; $("eDistrict").value = E.district || "";
@@ -1716,7 +1825,7 @@ $("editForm").addEventListener("submit", async (e) => {
       type, deal: E.deal, city, district, area: +digits($("eArea").value) || 0,
       age: ageTxt === "" ? null : +ageTxt, rooms: land ? 0 : (+digits($("eRooms").value) || 0), baths: land ? 0 : (+digits($("eBaths").value) || 0),
       thumb, photoCount: E.photos.length,
-      title, price, negotiable: $("eNeg").checked, description: $("eDesc").value.trim(), videoUrl,
+      title, price, negotiable: $("eNeg").checked, autoApprove: $("eAuto").checked, description: $("eDesc").value.trim(), videoUrl,
       adLicense: digits($("eLicense").value), locationVisibility: vis, mapUrl: vis === "public" ? mapUrl : "",
       sendToWasata: $("eWasata").checked });
     batch.set(doc(db, "listings", E.id, "private", "contact"), { phone, mapUrl: vis === "public" ? "" : mapUrl });
@@ -1737,6 +1846,7 @@ async function checkAdmin(){
   if (!currentUser) return;
   try { IS_ADMIN = (await getDoc(doc(db, "admins", currentUser.uid))).exists(); } catch(e){}
   $("acAdmin").hidden = !IS_ADMIN;
+  if (IS_ADMIN) refreshAdminTodo();
 }
 async function loadAccount(){
   $("acMsg").className = "msg";
@@ -1753,7 +1863,6 @@ async function loadAccount(){
   } catch(e){ console.error(e); }
   drawMailState();
   await checkAdmin();
-  if (IS_ADMIN) { try { const n = (await getDocs(query(collection(db, "reports"), where("status", "==", "open")))).size; $("adminBadge").hidden = !n; $("adminBadge").textContent = n; } catch(e){} }
 }
 $("acForm").addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -1912,6 +2021,58 @@ $("adList").addEventListener("click", async (e) => {
   } catch(err){ console.error(err); alert("ما تم الإجراء. تأكد إنك حدّثت القواعد."); loadAdmin(); }
 });
 
+/* ---------- الإدارة: حذف الإعلانات الملغاة نهائياً ---------- */
+async function loadAdminDeleted(){
+  const snap = await getDocs(query(collection(db, "listings"), where("status", "==", "deleted")));
+  const ls = snap.docs.map(d => ({ id:d.id, ...d.data() }));
+  $("adList").innerHTML = ls.length ? `<p class="meta" style="margin:0">إعلانات حذفها أصحابها. الحذف النهائي يمسحها مع صورها من قاعدة البيانات ويخفف الحجم.</p>
+    <button type="button" class="btn-no" style="height:44px;border-radius:12px;font-weight:600" data-delall="1">احذف الكل نهائياً (${ls.length})</button>` +
+    ls.map(l => `<article class="rq"><div class="rqhead"><span class="who"><b>${esc(l.title)}</b><span class="meta">إعلان ${esc(l.number)} · ${esc(l.city || "")}</span></span><span class="pill no">محذوف</span></div>
+      <div class="rqact"><button type="button" class="btn-no" data-purge="${esc(l.id)}">حذف نهائي</button></div></article>`).join("")
+    : `<div class="empty"><p>ما فيه إعلانات ملغاة.</p></div>`;
+}
+async function purgeListing(id){
+  const [ph, pv] = await Promise.all([getDocs(collection(db, "listings", id, "photos")), getDocs(collection(db, "listings", id, "private"))]);
+  const batch = writeBatch(db);
+  ph.docs.forEach(d => batch.delete(d.ref)); pv.docs.forEach(d => batch.delete(d.ref));
+  batch.delete(doc(db, "listings", id));
+  await batch.commit();
+}
+$("adList").addEventListener("click", async (e) => {
+  const one = e.target.closest("[data-purge]"), all = e.target.closest("[data-delall]");
+  if (!one && !all) return;
+  try {
+    if (one){
+      if (!confirm("تحذف هذا الإعلان نهائياً؟ ما يمديك ترجعه.")) return;
+      one.disabled = true; await purgeListing(one.dataset.purge);
+    } else {
+      if (!confirm("تحذف كل الإعلانات الملغاة نهائياً؟ ما يمديك ترجعها.")) return;
+      all.disabled = true; all.textContent = "جاري الحذف…";
+      const snap = await getDocs(query(collection(db, "listings"), where("status", "==", "deleted")));
+      for (const d of snap.docs) await purgeListing(d.id);
+    }
+    loadAdmin();
+  } catch(err){ console.error(err); alert("ما تم الحذف. تأكد إنك حدّثت القواعد."); loadAdmin(); }
+});
+
+/* ---------- التواصل مع الموثق (بعد الدفع) ---------- */
+let NOTARY = null;
+async function loadNotary(){ try { const d = await getDoc(doc(db, "settings", "notary")); NOTARY = d.exists() ? d.data() : null; } catch(e){ NOTARY = null; } }
+const waNum = (p) => { const d = toDigits(p); return d.startsWith("0") ? "966" + d.slice(1) : d; };
+function notaryBox(num){
+  if (!NOTARY || !NOTARY.phone) return "";
+  const text = encodeURIComponent(`السلام عليكم، تواصلت معك من تطبيق ملاك العقار بخصوص توثيق صفقة إعلان رقم ${num || ""}.`);
+  const wa = `<svg width="18" height="18" viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.6.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.2-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6a2.7 2.7 0 0 0 1.8-1.3 2.2 2.2 0 0 0 .2-1.3c-.1-.1-.3-.2-.5-.3z"/></svg>`;
+  const ph = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/></svg>`;
+  return `<div class="notary">
+    <b>التواصل مع الموثق${NOTARY.name ? `: ${esc(NOTARY.name)}` : ""}</b>
+    <p>${esc(NOTARY.note || "لإكمال الإفراغ أو توثيق عقد الإيجار، تواصل مع الموثق المعتمد.")}</p>
+    <div class="nbtns">
+      <a class="wa" href="https://wa.me/${esc(waNum(NOTARY.whatsapp || NOTARY.phone))}?text=${text}" target="_blank" rel="noopener">${wa}واتساب</a>
+      <a class="call" href="tel:${esc(toDigits(NOTARY.phone))}">${ph}اتصال</a>
+    </div></div>`;
+}
+
 /* ---------- لوحة الإدارة ---------- */
 let AD = { tab:"pay" };
 async function loadAdmin(){
@@ -1922,6 +2083,7 @@ async function loadAdmin(){
     if (AD.tab === "pay") return await loadAdminPay();
     if (AD.tab === "bank") return await loadAdminBank();
     if (AD.tab === "rec") return await loadAdminRecovery();
+    if (AD.tab === "deleted") return await loadAdminDeleted();
     if (AD.tab === "open"){
       const snap = await getDocs(query(collection(db, "reports"), where("status", "==", "open")));
       const reps = snap.docs.map(d => ({ id:d.id, ...d.data() })).sort((a,b) => (b.createdAt?.seconds||0) - (a.createdAt?.seconds||0));
