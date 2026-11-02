@@ -626,7 +626,7 @@ details.report summary{min-height:44px;display:flex;align-items:center;color:var
       <a href="#refund">سياسة رسوم الخدمة والاسترداد</a>
       <button type="button" class="danger" id="acOut">تسجيل الخروج</button>
     </div>
-    <p class="meta center" style="margin:0">الإصدار 1.7</p>
+    <p class="meta center" style="margin:0">الإصدار 1.8</p>
   </div>
 </main>
 
@@ -1671,7 +1671,7 @@ async function loadAdminBank(){
     <label class="f">اسم الموثق أو المكتب<input id="ntName" type="text" maxlength="60"></label>
     <label class="f">رقم الاتصال<input id="ntPhone" type="tel" inputmode="numeric" maxlength="15" dir="ltr" placeholder="05xxxxxxxx"></label>
     <label class="f">رقم الواتساب (إذا كان غير رقم الاتصال)<input id="ntWa" type="tel" inputmode="numeric" maxlength="15" dir="ltr" placeholder="اتركه فاضي إذا نفس الرقم"></label>
-    <label class="f">ملاحظة تظهر للعميل (اختياري)<input id="ntNote" type="text" maxlength="150" placeholder="مثال: لإكمال الإفراغ أو توثيق عقد الإيجار"></label>
+    <label class="f">ملاحظة تظهر للعميل (اختياري)<input id="ntNote" type="text" maxlength="150" placeholder="لإكمال إجراء الإفراغ الفوري"></label>
     <div class="msg" id="ntMsg" role="alert"></div>
     <button type="button" class="primary" id="ntSave">احفظ بيانات الموثق</button></div>`;
   await loadNotary();
@@ -2065,8 +2065,8 @@ function notaryBox(num){
   const wa = `<svg width="18" height="18" viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.6.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.2-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6a2.7 2.7 0 0 0 1.8-1.3 2.2 2.2 0 0 0 .2-1.3c-.1-.1-.3-.2-.5-.3z"/></svg>`;
   const ph = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/></svg>`;
   return `<div class="notary">
+    <p>${esc(NOTARY.note || "لإكمال إجراء الإفراغ الفوري")}</p>
     <b>التواصل مع الموثق${NOTARY.name ? `: ${esc(NOTARY.name)}` : ""}</b>
-    <p>${esc(NOTARY.note || "لإكمال الإفراغ أو توثيق عقد الإيجار، تواصل مع الموثق المعتمد.")}</p>
     <div class="nbtns">
       <a class="wa" href="https://wa.me/${esc(waNum(NOTARY.whatsapp || NOTARY.phone))}?text=${text}" target="_blank" rel="noopener">${wa}واتساب</a>
       <a class="call" href="tel:${esc(toDigits(NOTARY.phone))}">${ph}اتصال</a>
