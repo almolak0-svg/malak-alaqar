@@ -510,7 +510,7 @@ details.report summary{min-height:44px;display:flex;align-items:center;color:var
     <button type="button" data-st="rejected" aria-pressed="false">موقوفة</button>
     <button type="button" data-st="ownerCancelled" aria-pressed="false">ملغاة</button>
   </div>
-  <p class="status wait" id="rqNote" style="margin:12px 0 0">المشتري يسدد رسوم الخدمة 1% للإدارة، وبعد التأكيد يظهر له رقمك. إذا أنهيت الصفقة من جهتك تُرد له الرسوم.</p>
+  <p class="status wait" id="rqNote" style="margin:12px 0 0">المشتري يسدد رسوم الخدمة (1%) للإدارة.<br>في حال تم إلغاء البيع من طرف المالك تُسترد الرسوم فقط.</p>
   <div class="rqlist" id="rqList"><p class="meta">جاري تحميل الطلبات…</p></div>
 </main>
 
@@ -637,7 +637,7 @@ details.report summary{min-height:44px;display:flex;align-items:center;color:var
       <a href="#refund">سياسة رسوم الخدمة والاسترداد</a>
       <button type="button" class="danger" id="acOut">تسجيل الخروج</button>
     </div>
-    <p class="meta center" style="margin:0">الإصدار 2.2</p>
+    <p class="meta center" style="margin:0">الإصدار 2.3</p>
   </div>
 </main>
 
@@ -1260,7 +1260,7 @@ function contactIssue(raw, prevMine = []){
   }
   return "";
 }
-const CONTACT_TIP = "التواصل المباشر يتفعّل بعد موافقة المالك ودفع رسوم الخدمة. الأرقام الثانية مثل السعر والمساحة عادي تكتبها.";
+const CONTACT_TIP = "التواصل المباشر يتفعّل بعد سداد رسوم الخدمة. تقدر تكتب السعر والمساحة وباقي الأرقام فقط.";
 
 function wireActions(l){
   const start = $("rStart");
@@ -1524,7 +1524,7 @@ async function openChat(reqId){
 function drawChat(msgs){
   C.msgs = msgs;
   const { req, iAmOwner, reqId } = C;
-  let html = `<p class="sys">لحماية الطرفين، ممنوع تبادل الجوال أو وسائل التواصل هنا. السعر والمساحة وباقي الأرقام عادي.</p>`;
+  let html = `<p class="sys">لحماية الطرفين، ممنوع تبادل الجوال أو وسائل التواصل هنا. السعر والمساحة وباقي الأرقام فقط.</p>`;
   if (req.message) html += `<div class="bub ${iAmOwner ? "them" : "me"}">${esc(req.message)}<small>رسالة طلب المعاينة</small></div>`;
   html += msgs.map(m => {
     const who = m.senderId === currentUser.uid ? "me" : "them";
