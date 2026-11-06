@@ -637,7 +637,7 @@ details.report summary{min-height:44px;display:flex;align-items:center;color:var
       <a href="#refund">سياسة رسوم الخدمة والاسترداد</a>
       <button type="button" class="danger" id="acOut">تسجيل الخروج</button>
     </div>
-    <p class="meta center" style="margin:0">الإصدار 2.6</p>
+    <p class="meta center" style="margin:0">الإصدار 2.7</p>
   </div>
 </main>
 
@@ -1263,6 +1263,41 @@ function expandRepeats(n){
           .replace(RX_PLUR, (m, pre, d) => `${pre} ${String(DPLUR[d]).repeat(3)} `)
           .replace(RX_DUAL, (m, pre, d) => `${pre} ${String(DDUAL[d]).repeat(2)} `);
 }
+// مطابقة تقريبية للأخطاء الإملائية: «سفر» = صفر، «حمستين» = خمستين، «سبكه» = سبعه
+const CANON = (w) => w.replace(/خ/g, "ح").replace(/ث/g, "ت").replace(/ص/g, "س").replace(/[ذظ]/g, "ز").replace(/ض/g, "د");
+let FUZZ = null;
+function fuzzList(){
+  if (FUZZ) return FUZZ;
+  const big = NUMBIG.source.replace(/^\^و\?\(/, "").replace(/\)\$$/, "").split("|");
+  FUZZ = [
+    ...Object.entries(NUMW).map(([k, v]) => [CANON(k), String(v)]),
+    ...Object.entries(DDUAL).filter(([k]) => !k.includes(" ")).map(([k, v]) => [CANON(k), String(v).repeat(2)]),
+    ...Object.entries(DPLUR).map(([k, v]) => [CANON(k), String(v).repeat(3)]),
+    ...big.map(k => [CANON(k), ""])
+  ].filter(([k]) => k.length >= 3);
+  return FUZZ;
+}
+function lev1(a, b){
+  if (a === b) return true;
+  const la = a.length, lb = b.length; if (Math.abs(la - lb) > 1) return false;
+  let i = 0, j = 0, d = 0;
+  while (i < la && j < lb){
+    if (a[i] === b[j]) { i++; j++; continue; }
+    if (++d > 1) return false;
+    if (la > lb) i++; else if (lb > la) j++; else { i++; j++; }
+  }
+  return d + (la - i) + (lb - j) <= 1;
+}
+function fuzzyNum(w){
+  let c = CANON(w);
+  const tryOne = (x) => {
+    const L = fuzzList();
+    let e = L.find(([k]) => k === x);
+    if (!e && x.length >= 4) e = L.find(([k]) => k.length >= 4 && lev1(k, x));
+    return e || null;
+  };
+  return tryOne(c) || (c.length > 3 && c.startsWith("و") ? tryOne(c.slice(1)) : null);
+}
 function numNorm(t){
   let n = String(t || "").toLowerCase()
     .replace(/[\u064B-\u0652\u0640]/g, "").replace(/[أإآ]/g, "ا").replace(/ة/g, "ه").replace(/ى/g, "ي")
@@ -1272,7 +1307,9 @@ function numNorm(t){
     let k = w; if (!(k in NUMW) && k.startsWith("و") && (k.slice(1) in NUMW)) k = k.slice(1);
     if (k in NUMW) return ` ${NUMW[k]} `;
     const glued = w.length >= 6 ? splitNumWord(w) : null;
-    return glued ? ` ${glued} ` : w;
+    if (glued) return ` ${glued} `;
+    const fz = fuzzyNum(w);
+    return fz && fz[1] ? ` ${fz[1]} ` : w;
   });
   n = n.replace(/(^|[^\p{L}])(دبل|دبول|double)\s*(\d)/gu, "$1 $3$3 ")
        .replace(/(^|[^\p{L}])(تربل|تريبل|triple)\s*(\d)/gu, "$1 $3$3$3 ")
@@ -1292,8 +1329,9 @@ function contactIssue(raw, prevMine = []){
   if ((n.match(/\d+/g) || []).some(phoneRun)) return "رسالتك فيها رقم جوال.";
   // أرقام كثيرة مكتوبة بالحروف (مثل إملاء الجوال بالعشرات والمئات)
   const raw0 = String(raw || "").toLowerCase().replace(/[\u064B-\u0652\u0640]/g, "").replace(/[أإآ]/g, "ا").replace(/ة/g, "ه").replace(/ى/g, "ي");
-  const numWords = raw0.split(/[^\p{L}]+/u).filter(w => w && ((w in NUMW) || (w.startsWith("و") && (w.slice(1) in NUMW)) || NUMBIG.test(w) || (w.replace(/^و/, "") in DPLUR) || (w.replace(/^و/, "") in DDUAL) || /^(دبل|تربل|مرتين|مرات)$/.test(w))).length;
-  if (numWords >= 6) return "رسالتك فيها أرقام كثيرة مكتوبة بالحروف، ويبان إنها رقم جوال.";
+  const toks = raw0.split(/[^\p{L}\d]+/u).filter(Boolean);
+  const numWords = toks.filter(w => (w in NUMW) || (w.startsWith("و") && (w.slice(1) in NUMW)) || NUMBIG.test(w) || (w.replace(/^و/, "") in DPLUR) || (w.replace(/^و/, "") in DDUAL) || /^(دبل|تربل|مرتين|مرات)$/.test(w) || /^\d{1,3}$/.test(w) || !!fuzzyNum(w)).length;
+  if (numWords >= 6 || (numWords >= 5 && numWords / toks.length >= 0.6)) return "رسالتك فيها أرقام كثيرة مكتوبة بالحروف، ويبان إنها رقم جوال.";
   if (numberish(raw)) {   // رقم مقسّم على أكثر من رسالة
     const trail = [];
     for (let i = prevMine.length - 1; i >= 0 && trail.length < 5 && numberish(prevMine[i]); i--) trail.unshift(prevMine[i]);
