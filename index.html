@@ -637,7 +637,7 @@ details.report summary{min-height:44px;display:flex;align-items:center;color:var
       <a href="#refund">سياسة رسوم الخدمة والاسترداد</a>
       <button type="button" class="danger" id="acOut">تسجيل الخروج</button>
     </div>
-    <p class="meta center" style="margin:0">الإصدار 2.3</p>
+    <p class="meta center" style="margin:0">الإصدار 2.4</p>
   </div>
 </main>
 
@@ -653,7 +653,7 @@ details.report summary{min-height:44px;display:flex;align-items:center;color:var
     <a class="iconbtn" href="#account" aria-label="رجوع"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1B2F5B" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a>
     <h1>لوحة الإدارة</h1>
   </div>
-  <div class="seg" id="adTabs"><button type="button" data-ad="pay" aria-pressed="true">التحويلات</button><button type="button" data-ad="rec" aria-pressed="false">الاستعادة</button><button type="button" data-ad="open" aria-pressed="false">البلاغات</button><button type="button" data-ad="hidden" aria-pressed="false">المخفية</button><button type="button" data-ad="deleted" aria-pressed="false">المحذوفة</button><button type="button" data-ad="bank" aria-pressed="false">الحساب</button></div>
+  <div class="seg" id="adTabs"><button type="button" data-ad="pay" aria-pressed="true">التحويلات</button><button type="button" data-ad="rec" aria-pressed="false">الاستعادة</button><button type="button" data-ad="open" aria-pressed="false">البلاغات</button><button type="button" data-ad="hidden" aria-pressed="false">المخفية</button><button type="button" data-ad="deleted" aria-pressed="false">التنظيف</button><button type="button" data-ad="banned" aria-pressed="false">المحظورة</button><button type="button" data-ad="bank" aria-pressed="false">الحساب</button></div>
   <div class="rqlist" id="adList"><p class="meta">جاري التحميل…</p></div>
 </main>
 
@@ -755,7 +755,7 @@ onAuthStateChanged(auth, (user) => {
   if (user){
     $("helloName").textContent = "مرحباً " + (user.displayName || "");
     btn.textContent = "خروج"; btn.href = "#home";
-    $("reqBtn").hidden = true; btn.hidden = true; Promise.all([loadUserDoc(), loadNotary()]).then(() => { refreshBadge(); render(); }); checkAdmin();
+    $("reqBtn").hidden = true; btn.hidden = true; Promise.all([loadUserDoc(), loadNotary()]).then(() => { refreshBadge(); render(); checkBanned(); }); checkAdmin();
     btn.onclick = async (e) => { e.preventDefault(); await signOut(auth); };
     if (["#login","#signup","#forgot"].includes(location.hash)) location.hash = "#home";
     syncIndex(user);
@@ -1369,6 +1369,7 @@ function drawTodo(){
     if (ADMIN_TODO.rec) a.push(`${ADMIN_TODO.rec} طلب استعادة حساب`);
     if (ADMIN_TODO.rep) a.push(`${ADMIN_TODO.rep} بلاغ جديد`);
   }
+  if (typeof BANNED !== "undefined" && BANNED) return;
   adm.hidden = !a.length;
   adm.innerHTML = a.length ? `<a class="tditem" href="#admin"><span><b>الإدارة:</b> ${a.join("، ")}</span><span class="go">لوحة الإدارة ←</span></a>` : "";
   const n = hot + a.length;
@@ -2140,6 +2141,130 @@ function notaryBox(num){
     </div></div>`;
 }
 
+/* ---------- الإدارة: التنظيف (محادثات موقوفة وملغاة + بلاغات معالجة + إعلانات محذوفة) ---------- */
+const delAllBtn = (attr, n, label) => `<button type="button" class="btn-no" style="height:44px;border-radius:12px;font-weight:600" ${attr}="1">${label} (${n})</button>`;
+async function loadAdminClean(){
+  const [ls, cv, rp] = await Promise.all([
+    getDocs(query(collection(db, "listings"), where("status", "==", "deleted"))),
+    getDocs(query(collection(db, "viewingRequests"), where("status", "in", ["rejected", "ownerCancelled"]))),
+    getDocs(query(collection(db, "reports"), where("status", "==", "resolved")))]);
+  const convs = await Promise.all(cv.docs.map(async d => {
+    let pay = null; try { const p = await getDoc(doc(db, "payments", d.id)); pay = p.exists() ? p.data().status : null; } catch(e){}
+    return { id:d.id, ...d.data(), pay, locked: pay === "pending" || pay === "confirmed" };
+  }));
+  const free = convs.filter(c => !c.locked);
+  let html = `<h2 style="margin:0">المحادثات الموقوفة والملغاة (${convs.length})</h2>`;
+  html += convs.length ? (free.length ? delAllBtn("data-delchats", free.length, "احذف المحادثات كلها") : "") + convs.map(c => `<article class="rq">
+      <div class="rqhead"><span class="who"><b>${esc(c.buyerName || "مشتري")}</b><span class="meta">${esc(c.listingTitle || "")} · إعلان ${esc(c.listingNumber || "")}</span></span>
+        <span class="pill no">${c.status === "rejected" ? "موقوفة" : "ملغاة"}</span></div>
+      ${c.locked ? `<div class="status wait">فيها سداد ${c.pay === "pending" ? "بانتظار التأكيد" : "مؤكد"}. رجّع المبلغ من «التحويلات» أول، وبعدها تقدر تحذفها.</div>`
+        : `<div class="rqact"><button type="button" class="btn-no" data-delchat="${esc(c.id)}">حذف المحادثة</button></div>`}</article>`).join("")
+    : `<p class="meta" style="margin:0">ما فيه محادثات موقوفة أو ملغاة.</p>`;
+  const reps = rp.docs.map(d => ({ id:d.id, ...d.data() }));
+  html += `<h2 style="margin:12px 0 0">البلاغات المعالجة (${reps.length})</h2>`;
+  html += reps.length ? delAllBtn("data-delreps", reps.length, "احذف البلاغات كلها") + reps.map(r => `<article class="rq">
+      <div class="rqhead"><span class="who"><b>${esc(r.reason)}</b><span class="meta">${esc(r.listingTitle || "")} · إعلان ${esc(r.listingNumber || "")}</span></span>
+        <span class="pill ok">${r.action === "hidden" ? "أُخفي الإعلان" : "تجاهلته"}</span></div>
+      <div class="rqact"><button type="button" class="btn-no" data-delrep="${esc(r.id)}">حذف البلاغ</button></div></article>`).join("")
+    : `<p class="meta" style="margin:0">ما فيه بلاغات معالجة.</p>`;
+  const lst = ls.docs.map(d => ({ id:d.id, ...d.data() }));
+  html += `<h2 style="margin:12px 0 0">الإعلانات المحذوفة (${lst.length})</h2>`;
+  html += lst.length ? delAllBtn("data-delall", lst.length, "احذف الإعلانات كلها نهائياً") + lst.map(l => `<article class="rq"><div class="rqhead"><span class="who"><b>${esc(l.title)}</b><span class="meta">إعلان ${esc(l.number)} · ${esc(l.city || "")}</span></span><span class="pill no">محذوف</span></div>
+      <div class="rqact"><button type="button" class="btn-no" data-purge="${esc(l.id)}">حذف نهائي</button></div></article>`).join("")
+    : `<p class="meta" style="margin:0">ما فيه إعلانات محذوفة.</p>`;
+  $("adList").innerHTML = html;
+}
+async function purgeChat(rid){
+  const msgs = await getDocs(collection(db, "chats", rid, "messages"));
+  const refs = msgs.docs.map(d => d.ref);
+  for (let i = 0; i < refs.length; i += 400){ const b = writeBatch(db); refs.slice(i, i + 400).forEach(r => b.delete(r)); await b.commit(); }
+  await deleteDoc(doc(db, "viewingRequests", rid));
+}
+$("adList").addEventListener("click", async (e) => {
+  const c1 = e.target.closest("[data-delchat]"), cA = e.target.closest("[data-delchats]"),
+        r1 = e.target.closest("[data-delrep]"), rA = e.target.closest("[data-delreps]");
+  if (!c1 && !cA && !r1 && !rA) return;
+  try {
+    if (c1){
+      if (!confirm("تحذف هذي المحادثة ورسايلها نهائياً؟")) return;
+      c1.disabled = true; await purgeChat(c1.dataset.delchat);
+    } else if (cA){
+      if (!confirm("تحذف كل المحادثات الموقوفة والملغاة نهائياً؟ (اللي فيها سداد ما تنحذف)")) return;
+      cA.disabled = true; cA.textContent = "جاري الحذف…";
+      for (const b of document.querySelectorAll("[data-delchat]")) await purgeChat(b.dataset.delchat);
+    } else if (r1){
+      if (!confirm("تحذف هذا البلاغ؟")) return;
+      r1.disabled = true; await deleteDoc(doc(db, "reports", r1.dataset.delrep));
+    } else {
+      if (!confirm("تحذف كل البلاغات المعالجة؟")) return;
+      rA.disabled = true; rA.textContent = "جاري الحذف…";
+      const snap = await getDocs(query(collection(db, "reports"), where("status", "==", "resolved")));
+      const b = writeBatch(db); snap.docs.forEach(d => b.delete(d.ref)); await b.commit();
+    }
+    loadAdmin(); refreshAdminTodo();
+  } catch(err){ console.error(err); alert("ما تم الحذف. تأكد إنك حدّثت القواعد."); loadAdmin(); }
+});
+
+/* ---------- الإدارة: حظر الحسابات المخالفة ---------- */
+async function banUser(uidToBan, info){
+  if (uidToBan === currentUser.uid) { alert("ما تقدر تحظر حسابك."); return false; }
+  const reason = prompt("سبب الحظر (للإدارة فقط):", "مخالفة شروط الاستخدام");
+  if (reason === null) return false;
+  await setDoc(doc(db, "banned", uidToBan), { uid: uidToBan, name: info.name || "", phone: info.phone || "", reason: reason.slice(0, 150), createdAt: serverTimestamp() });
+  const ls = await getDocs(query(collection(db, "listings"), where("ownerId", "==", uidToBan)));
+  const b = writeBatch(db); let n = 0;
+  ls.docs.forEach(d => { if (["active", "reserved", "closed"].includes(d.data().status)) { b.update(d.ref, { status: "hidden" }); n++; } });
+  if (n) await b.commit();
+  alert(`تم حظر الحساب${n ? `، وانخفى ${n} إعلان له` : ""}. ما يقدر ينشر أو يراسل بعد الآن.\nإذا تبي تحذف الحساب نهائياً: Firebase ← Authentication ← Users، وابحث بالـ UID: ${uidToBan}`);
+  return true;
+}
+async function loadAdminBanned(){
+  const snap = await getDocs(collection(db, "banned"));
+  const bs = snap.docs.map(d => ({ id:d.id, ...d.data() })).sort((a,b) => (b.createdAt?.seconds||0) - (a.createdAt?.seconds||0));
+  $("adList").innerHTML = `<div class="box">
+      <h2>حظر حساب برقم الجوال</h2>
+      <p class="meta" style="margin:0">المحظور ما يقدر ينشر إعلانات ولا يفتح محادثات ولا يرسل رسايل، وتنخفي إعلاناته.</p>
+      <label class="f">رقم جوال الدخول<input id="banPhone" type="tel" inputmode="numeric" dir="ltr" placeholder="05xxxxxxxx"></label>
+      <button type="button" class="btn-no" style="height:44px;border-radius:12px;font-weight:600" id="banGo">حظر الحساب</button></div>
+    <h2 style="margin:8px 0 0">الحسابات المحظورة (${bs.length})</h2>` +
+    (bs.length ? bs.map(x => `<article class="rq">
+      <div class="rqhead"><span class="who"><b>${esc(x.name || x.phone || "حساب")}</b><span class="meta">${whenText(x.createdAt)}${x.phone ? ` · <span dir="ltr">${esc(x.phone)}</span>` : ""}</span></span><span class="pill no">محظور</span></div>
+      ${x.reason ? `<p class="rqmsg">${esc(x.reason)}</p>` : ""}
+      <p class="meta" style="margin:0;direction:ltr;text-align:right;word-break:break-all">UID: ${esc(x.id)}</p>
+      <div class="rqact"><button type="button" class="btn-ok" data-unban="${esc(x.id)}">فك الحظر</button></div></article>`).join("")
+    : `<p class="meta" style="margin:0">ما فيه حسابات محظورة.</p>`);
+  $("banGo").addEventListener("click", async () => {
+    const p = normPhone($("banPhone").value);
+    if (!/^05\d{8}$/.test(p)) return alert("اكتب الرقم بصيغة 05xxxxxxxx.");
+    const ix = await getIndex(p);
+    if (!ix?.uid) return alert("ما لقينا حساب مسجّل بهذا الرقم. (الحسابات القديمة تنربط برقمها بعد أول دخول)");
+    try { if (await banUser(ix.uid, { phone: p })) loadAdmin(); }
+    catch(err){ console.error(err); alert("ما تم الحظر. تأكد إنك حدّثت القواعد."); }
+  });
+}
+$("adList").addEventListener("click", async (e) => {
+  const bl = e.target.closest("[data-banl]"), ub = e.target.closest("[data-unban]");
+  if (!bl && !ub) return;
+  try {
+    if (bl){
+      const l = await getDoc(doc(db, "listings", bl.dataset.banl));
+      if (!l.exists()) return alert("الإعلان ما عاد موجود.");
+      if (!confirm(`تحظر صاحب إعلان «${l.data().title}»؟ تنخفي كل إعلاناته وما يقدر يراسل أحد.`)) return;
+      if (await banUser(l.data().ownerId, { name: l.data().ownerName || "" })) { loadAdmin(); loadListings(); refreshAdminTodo(); }
+    } else {
+      if (!confirm("تفك الحظر عن هذا الحساب؟ (إعلاناته تبقى مخفية، وتقدر تظهرها من «المخفية»)")) return;
+      await deleteDoc(doc(db, "banned", ub.dataset.unban)); loadAdmin();
+    }
+  } catch(err){ console.error(err); alert("ما تم الإجراء. تأكد إنك حدّثت القواعد."); }
+});
+
+/* ---------- تنبيه المستخدم المحظور ---------- */
+let BANNED = false;
+async function checkBanned(){
+  try { BANNED = (await getDoc(doc(db, "banned", currentUser.uid))).exists(); } catch(e){ BANNED = false; }
+  if (BANNED){ const t = $("todo"); t.hidden = false; t.innerHTML = `<div class="status no">حسابك موقوف من الإدارة بسبب مخالفة شروط الاستخدام. ما تقدر تنشر إعلانات أو ترسل رسايل.</div>`; }
+}
+
 /* ---------- لوحة الإدارة ---------- */
 let AD = { tab:"pay" };
 async function loadAdmin(){
@@ -2150,7 +2275,8 @@ async function loadAdmin(){
     if (AD.tab === "pay") return await loadAdminPay();
     if (AD.tab === "bank") return await loadAdminBank();
     if (AD.tab === "rec") return await loadAdminRecovery();
-    if (AD.tab === "deleted") return await loadAdminDeleted();
+    if (AD.tab === "deleted") return await loadAdminClean();
+    if (AD.tab === "banned") return await loadAdminBanned();
     if (AD.tab === "open"){
       const snap = await getDocs(query(collection(db, "reports"), where("status", "==", "open")));
       const reps = snap.docs.map(d => ({ id:d.id, ...d.data() })).sort((a,b) => (b.createdAt?.seconds||0) - (a.createdAt?.seconds||0));
@@ -2159,14 +2285,16 @@ async function loadAdmin(){
         <a class="meta" href="#listing-${esc(r.listingId)}">${esc(r.listingTitle)} · إعلان ${esc(r.listingNumber)}</a>
         ${r.note ? `<p class="rqmsg">${esc(r.note)}</p>` : ""}
         <div class="rqact"><button type="button" class="btn-no" data-hide="${esc(r.listingId)}" data-rep="${esc(r.id)}">أخفِ الإعلان</button>
-          <button type="button" class="ghost" data-dismiss="${esc(r.id)}">تجاهل البلاغ</button></div></article>`).join("")
+          <button type="button" class="ghost" data-dismiss="${esc(r.id)}">تجاهل البلاغ</button></div>
+        <button type="button" class="link" style="color:var(--danger)" data-banl="${esc(r.listingId)}">حظر صاحب الإعلان</button></article>`).join("")
         : `<div class="empty"><p>ما فيه بلاغات جديدة.</p></div>`;
     } else {
       const snap = await getDocs(query(collection(db, "listings"), where("status", "==", "hidden")));
       const ls = snap.docs.map(d => ({ id:d.id, ...d.data() }));
       $("adList").innerHTML = ls.length ? ls.map(l => `<article class="rq">
         <a class="meta" href="#listing-${esc(l.id)}"><b style="color:var(--ink)">${esc(l.title)}</b> · إعلان ${esc(l.number)}</a>
-        <div class="rqact"><button type="button" class="btn-ok" data-unhide="${esc(l.id)}">أظهر الإعلان</button></div></article>`).join("")
+        <div class="rqact"><button type="button" class="btn-ok" data-unhide="${esc(l.id)}">أظهر الإعلان</button>
+          <button type="button" class="btn-no" data-banl="${esc(l.id)}">حظر المالك</button></div></article>`).join("")
         : `<div class="empty"><p>ما فيه إعلانات مخفية.</p></div>`;
     }
   } catch(err){ console.error(err); $("adList").innerHTML = `<div class="empty"><p>ما قدرنا نحمّل البيانات. تأكد إنك حدّثت القواعد.</p></div>`; }
