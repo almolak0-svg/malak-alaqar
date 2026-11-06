@@ -320,7 +320,7 @@ details.report summary{min-height:44px;display:flex;align-items:center;color:var
   </div>
   <div class="chips" id="typeChips"></div>
   <div class="cta">
-    <div><strong>عندك عقار؟</strong><span>اعرضه بنفسك، وتحادث المشترين مباشرة.</span></div>
+    <div><strong>عندك عقار؟</strong><span>اعرضه بنفسك، وتحدث مع المشتري مباشرة.</span></div>
     <button type="button" id="addBtn">أضف عقارك</button>
   </div>
   <section class="todo" id="todo" hidden aria-live="polite" style="margin-top:14px"></section>
@@ -637,7 +637,7 @@ details.report summary{min-height:44px;display:flex;align-items:center;color:var
       <a href="#refund">سياسة رسوم الخدمة والاسترداد</a>
       <button type="button" class="danger" id="acOut">تسجيل الخروج</button>
     </div>
-    <p class="meta center" style="margin:0">الإصدار 2.0</p>
+    <p class="meta center" style="margin:0">الإصدار 2.2</p>
   </div>
 </main>
 
@@ -895,7 +895,7 @@ function render(){
   $("fCount").hidden = !active; $("fCount").textContent = active;
   $("count").textContent = shown.length ? `${shown.length} عرض` : "";
   $("list").innerHTML = shown.length ? shown.map(card).join("") :
-    `<div class="empty"><p>${listings.length ? "ما فيه عروض تطابق بحثك. جرّب نوع أو مدينة ثانية." : "ما فيه عقارات منشورة للحين. كن أول مالك يعرض عقاره."}</p>
+    `<div class="empty"><p>${listings.length ? "ما فيه عروض تطابق بحثك. جرّب نوع أو مدينة ثانية." : "لا يوجد عروض الآن."}</p>
      ${listings.length ? "" : '<button type="button" class="primary" style="padding:0 20px" onclick="document.getElementById(\'addBtn\').click()">أضف عقارك</button>'}</div>`;
 }
 
@@ -1358,7 +1358,7 @@ function drawTodo(){
     }).join("");
     rows.slice(4).forEach(r => { if (convState(r, side)[2]) hot++; });
     return `<div class="dcol"><h3>${icon} ${title}${rows.length ? ` <span class="badge">${rows.length}</span>` : ""}</h3>
-      ${items || `<p class="dempty">${side === "owner" ? "لما يتواصل معك مشتري تظهر محادثته هنا." : "افتح أي عقار واضغط «تواصل مع المالك»."}</p>`}
+      ${items || `<p class="dempty">${side === "owner" ? "تحدث مع المشتري هنا." : "افتح أي عقار واضغط «تواصل مع المالك»."}</p>`}
       ${rows.length > 4 ? `<a class="link" href="#requests" data-side-go="${side}">عرض الكل</a>` : ""}</div>`;
   };
   box.innerHTML = col("owner", R.owner, "المالك", "🏠") + col("buyer", R.buyer, "المشتري", "🔍");
