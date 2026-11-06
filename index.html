@@ -637,7 +637,7 @@ details.report summary{min-height:44px;display:flex;align-items:center;color:var
       <a href="#refund">سياسة رسوم الخدمة والاسترداد</a>
       <button type="button" class="danger" id="acOut">تسجيل الخروج</button>
     </div>
-    <p class="meta center" style="margin:0">الإصدار 2.4</p>
+    <p class="meta center" style="margin:0">الإصدار 2.5</p>
   </div>
 </main>
 
@@ -1232,14 +1232,30 @@ const scrub = (t) => String(t || "")
 /* ---------- منع وسائل التواصل في المحادثة ---------- */
 const NUMW = { "صفر":0,"زيرو":0,"واحد":1,"وحده":1,"اثنين":2,"اثنان":2,"اتنين":2,"ثنين":2,"ثلاث":3,"ثلاثه":3,"تلات":3,"تلاته":3,
   "اربع":4,"اربعه":4,"خمس":5,"خمسه":5,"ست":6,"سته":6,"سبع":7,"سبعه":7,"ثمان":8,"ثماني":8,"ثمانيه":8,"ثمنيه":8,"تمنيه":8,"تمانيه":8,
-  "تسع":9,"تسعه":9,"zero":0,"one":1,"two":2,"three":3,"four":4,"five":5,"six":6,"seven":7,"eight":8,"nine":9 };
+  "تسع":9,"تسعه":9,"zero":0,"one":1,"two":2,"three":3,"four":4,"five":5,"six":6,"seven":7,"eight":8,"nine":9,
+  "زيرو":0,"سيرو":0,"ون":1,"وان":1,"تو":2,"ثري":3,"تري":3,"فور":4,"فايف":5,"فايڤ":5,"سكس":6,"سيكس":6,"سفن":7,"سيفن":7,"ايت":8,"ايث":8,"ناين":9,"ناين":9 };
+// كلمات أعداد مركبة (عشرات ومئات) تُستخدم لإملاء الرقم بالكلام
+const NUMBIG = /^و?(عشر|عشره|احدعش|حدعش|اطنعش|اثنعش|ثلطعش|ثلاثطعش|اربعطعش|خمسطعش|ستطعش|سبعطعش|ثمنطعش|تسعطعش|عشرين|ثلاثين|تلاتين|اربعين|خمسين|ستين|سبعين|ثمانين|تمانين|تسعين|ميه|مية|مئه|مايه|ميتين|ثلاثميه|ثلثميه|اربعميه|خمسميه|ستميه|سبعميه|ثمنميه|ثمانميه|تسعميه|الف|الفين|الاف)$/;
+// يفكّ الكلمات الملصوقة مثل «صفرخمسةخمسة»
+function splitNumWord(w){
+  const keys = Object.keys(NUMW).filter(k => k.length >= 3).sort((a,b) => b.length - a.length);
+  const out = []; let i = 0;
+  while (i < w.length){
+    const k = keys.find(k => w.startsWith(k, i));
+    if (!k) { if (w[i] === "و" && i > 0) { i++; continue; } return null; }
+    out.push(NUMW[k]); i += k.length;
+  }
+  return out.length >= 2 ? out.join("") : null;
+}
 function numNorm(t){
   let n = String(t || "").toLowerCase()
     .replace(/[\u064B-\u0652\u0640]/g, "").replace(/[أإآ]/g, "ا").replace(/ة/g, "ه").replace(/ى/g, "ي")
     .replace(/[٠-٩]/g, d => "٠١٢٣٤٥٦٧٨٩".indexOf(d)).replace(/[۰-۹]/g, d => "۰۱۲۳۴۵۶۷۸۹".indexOf(d));
   n = n.replace(/\p{L}+/gu, w => {
     let k = w; if (!(k in NUMW) && k.startsWith("و") && (k.slice(1) in NUMW)) k = k.slice(1);
-    return k in NUMW ? ` ${NUMW[k]} ` : w;
+    if (k in NUMW) return ` ${NUMW[k]} `;
+    const glued = w.length >= 6 ? splitNumWord(w) : null;
+    return glued ? ` ${glued} ` : w;
   });
   return n.replace(/(\d)[^\p{L}\d]+(?=\d)/gu, "$1");   // يجمع الأرقام المفصولة بمسافات أو رموز
 }
@@ -1252,6 +1268,10 @@ function contactIssue(raw, prevMine = []){
   if (/(@|واتس|وتساب|whatsapp|تلقرام|تليقرام|تليجرام|تيليجرام|telegram|سناب|snapchat|انستا|instagram|ايميل|email|gmail|hotmail|رقمي|رقمك|جوالي|جوالك|اتصل علي|كلمني علي)/.test(n))
     return "ممنوع تبادل الجوال أو وسائل التواصل داخل المحادثة.";
   if ((n.match(/\d+/g) || []).some(phoneRun)) return "رسالتك فيها رقم جوال.";
+  // أرقام كثيرة مكتوبة بالحروف (مثل إملاء الجوال بالعشرات والمئات)
+  const raw0 = String(raw || "").toLowerCase().replace(/[\u064B-\u0652\u0640]/g, "").replace(/[أإآ]/g, "ا").replace(/ة/g, "ه").replace(/ى/g, "ي");
+  const numWords = raw0.split(/[^\p{L}]+/u).filter(w => w && ((w in NUMW) || (w.startsWith("و") && (w.slice(1) in NUMW)) || NUMBIG.test(w))).length;
+  if (numWords >= 6) return "رسالتك فيها أرقام كثيرة مكتوبة بالحروف، ويبان إنها رقم جوال.";
   if (numberish(raw)) {   // رقم مقسّم على أكثر من رسالة
     const trail = [];
     for (let i = prevMine.length - 1; i >= 0 && trail.length < 5 && numberish(prevMine[i]); i--) trail.unshift(prevMine[i]);
