@@ -39,6 +39,19 @@ a{color:var(--brand)}
 
 /* home */
 .hello{margin:8px 0 14px}
+.dbox{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;margin:14px 0}
+.dcol{background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:10px;display:flex;flex-direction:column;gap:8px;min-height:120px;background:#EFE6D6}
+.dcol h3{margin:0;font-size:15px;color:var(--ink);display:flex;align-items:center;gap:6px}
+.ditem{display:flex;flex-direction:column;gap:2px;background:var(--raised);border-radius:10px;padding:8px 10px;text-decoration:none;color:var(--ink);font-size:13px;line-height:20px;border:1px solid transparent}
+.ditem .st{font-size:12px;font-weight:600}.ditem .st.ok{color:var(--ok)}.ditem .st.wait{color:#A35F00}.ditem .st.new{color:var(--brand)}
+.ditem.hot{border-color:var(--brand)}
+.dempty{font-size:12px;color:var(--muted);margin:auto 0;text-align:center}
+.paybar{display:flex;flex-direction:column;gap:6px;padding:12px;border-radius:14px;background:var(--raised);border:1.5px solid var(--brand)}
+.paybar a{display:flex;align-items:center;justify-content:center;text-decoration:none}
+.paybar small{font-size:12px;color:var(--muted);text-align:center}
+.otools{display:flex;gap:8px}.otools button{flex:1;min-height:44px;border-radius:12px;font:inherit;font-size:13px;font-weight:600;cursor:pointer}
+.otools .loc{background:#F3EAD8;border:1px solid #C9A267;color:var(--gold-text)}.otools .stop{background:var(--raised);border:1px solid var(--line);color:var(--danger)}
+.locmsg{display:flex;flex-direction:column;gap:6px}.locmsg a{color:inherit;font-weight:700}
 .todo{background:var(--raised);border:1px solid var(--line);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:8px;margin-bottom:14px}
 .todo h2{font-size:15px;margin:0;display:flex;align-items:center;gap:8px}
 .tditem{display:flex;flex-direction:column;gap:8px;padding:10px 12px;border-radius:12px;background:#FFF8EC;border:1px solid #F3E2C2;text-decoration:none;color:var(--ink);font-size:14px;line-height:22px}
@@ -278,7 +291,6 @@ details.report summary{min-height:44px;display:flex;align-items:center;color:var
     <p id="helloName">مرحباً بك</p>
     <h1>عقارك من مالكه… مباشرة</h1>
   </section>
-  <section class="todo" id="todo" hidden aria-live="polite"></section>
   <div class="searchrow">
   <label class="search">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#5B6478" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>
@@ -308,9 +320,11 @@ details.report summary{min-height:44px;display:flex;align-items:center;color:var
   </div>
   <div class="chips" id="typeChips"></div>
   <div class="cta">
-    <div><strong>عندك عقار؟</strong><span>اعرضه بنفسك، وأنت اللي تقرر مين يعاينه.</span></div>
+    <div><strong>عندك عقار؟</strong><span>اعرضه بنفسك، وتحادث المشترين مباشرة.</span></div>
     <button type="button" id="addBtn">أضف عقارك</button>
   </div>
+  <section class="todo" id="todo" hidden aria-live="polite" style="margin-top:14px"></section>
+  <section class="dbox" id="dbox" hidden aria-label="المحادثات"></section>
   <div class="sechead"><h2>أحدث العروض</h2><span class="meta" id="count"></span></div>
   <div class="list" id="list"><p class="meta">جاري تحميل العروض…</p></div>
 </main>
@@ -412,7 +426,6 @@ details.report summary{min-height:44px;display:flex;align-items:center;color:var
     </div>
     <label class="f"><span id="priceLabel">السعر (ريال)</span><input id="aPrice" type="text" inputmode="numeric" placeholder="مثال: 850000"></label>
     <label class="check"><input id="aNeg" type="checkbox" checked>السعر قابل للتفاوض</label>
-    <label class="check"><input id="aAuto" type="checkbox"><span>اقبل طلبات المعاينة تلقائياً<br><small class="meta">يختصر خطوة: المشتري يحوّل الرسوم على طول بدون انتظار موافقتك.</small></span></label>
     <div class="row2">
       <label class="f">المدينة<input id="aCity" type="text" placeholder="الرياض"></label>
       <label class="f">الحي<input id="aDistrict" type="text" placeholder="حي الياسمين"></label>
@@ -432,13 +445,13 @@ details.report summary{min-height:44px;display:flex;align-items:center;color:var
       <label class="f">رابط الموقع على الخريطة<input id="aMap" type="url" placeholder="الصق رابط قوقل ماب"></label>
       <fieldset>
         <legend>مين يشوف الموقع؟</legend>
-        <label class="opt"><input type="radio" name="locvis" value="approved" checked><span><b>بعد موافقتي فقط</b><span>الظاهر للناس اسم الحي، والموقع الدقيق لمن يدفع رسوم الخدمة.</span></span></label>
+        <label class="opt"><input type="radio" name="locvis" value="approved" checked><span><b>أشاركه بنفسي</b><span>الظاهر للناس اسم الحي، وأنت تشارك الموقع الدقيق في المحادثة مع المشتري اللي تبيه.</span></span></label>
         <label class="opt"><input type="radio" name="locvis" value="public"><span><b>يظهر للجميع</b><span>أي زائر يقدر يفتح موقع العقار على الخريطة.</span></span></label>
       </fieldset>
     </div>
     <div class="box lock">
-      <h2>رقم التواصل يظهر بعد موافقتك فقط</h2>
-      <p>ما يشوف رقمك إلا اللي توافق على طلب معاينته ويدفع رسوم الخدمة 1%.</p>
+      <h2>رقمك يظهر بعد سداد الرسوم فقط</h2>
+      <p>ما يشوف رقمك إلا المشتري اللي يسدد رسوم الخدمة 1% للإدارة.</p>
       <label class="f">جوال / واتساب<input id="aPhone" type="tel" inputmode="numeric" placeholder="05xxxxxxxx"></label>
     </div>
     <!-- مخفي مؤقتاً لين يتفعّل الربط مع وسطاء المملكة -->
@@ -485,20 +498,19 @@ details.report summary{min-height:44px;display:flex;align-items:center;color:var
     <a class="iconbtn" href="#home" aria-label="رجوع">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1B2F5B" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
     </a>
-    <h1>طلباتي</h1>
+    <h1>المحادثات</h1>
   </div>
   <div class="seg" id="rqSide" style="margin-top:4px">
-    <button type="button" data-side="owner" aria-pressed="true">على عقاراتي</button>
-    <button type="button" data-side="buyer" aria-pressed="false">أرسلتها أنا</button>
+    <button type="button" data-side="owner" aria-pressed="true">المالك</button>
+    <button type="button" data-side="buyer" aria-pressed="false">المشتري</button>
   </div>
   <div class="chips" id="rqStatus" style="margin-top:12px">
-    <button type="button" data-st="pending" aria-pressed="true">جديدة</button>
-    <button type="button" data-st="approved" aria-pressed="false">مقبولة</button>
+    <button type="button" data-st="approved" aria-pressed="true">مفتوحة</button>
     <button type="button" data-st="paid" aria-pressed="false">مدفوعة</button>
-    <button type="button" data-st="rejected" aria-pressed="false">معتذر عنها</button>
+    <button type="button" data-st="rejected" aria-pressed="false">موقوفة</button>
     <button type="button" data-st="ownerCancelled" aria-pressed="false">ملغاة</button>
   </div>
-  <p class="status wait" id="rqNote" style="margin:12px 0 0">بعد موافقتك يدفع الشخص رسوم الخدمة 1%، وبعدها يظهر له رقمك. إذا أنهيت الصفقة من جهتك تُرد له الرسوم.</p>
+  <p class="status wait" id="rqNote" style="margin:12px 0 0">المشتري يسدد رسوم الخدمة 1% للإدارة، وبعد التأكيد يظهر له رقمك. إذا أنهيت الصفقة من جهتك تُرد له الرسوم.</p>
   <div class="rqlist" id="rqList"><p class="meta">جاري تحميل الطلبات…</p></div>
 </main>
 
@@ -570,7 +582,6 @@ details.report summary{min-height:44px;display:flex;align-items:center;color:var
     </div>
     <label class="f"><span id="ePriceLabel">السعر (ريال)</span><input id="ePrice" type="text" inputmode="numeric"></label>
     <label class="check"><input id="eNeg" type="checkbox">السعر قابل للتفاوض</label>
-    <label class="check"><input id="eAuto" type="checkbox"><span>اقبل طلبات المعاينة تلقائياً<br><small class="meta">المشتري يحوّل الرسوم على طول بدون انتظار موافقتك.</small></span></label>
     <label class="f">الوصف<textarea id="eDesc" class="ta" maxlength="1000"></textarea></label>
     <label class="f">رابط فيديو (اختياري)<input id="eVideo" type="url" placeholder="رابط يوتيوب أو تيك توك"></label>
     <label class="f">رقم ترخيص الإعلان العقاري<input id="eLicense" type="text" inputmode="numeric"></label>
@@ -626,7 +637,7 @@ details.report summary{min-height:44px;display:flex;align-items:center;color:var
       <a href="#refund">سياسة رسوم الخدمة والاسترداد</a>
       <button type="button" class="danger" id="acOut">تسجيل الخروج</button>
     </div>
-    <p class="meta center" style="margin:0">الإصدار 1.8</p>
+    <p class="meta center" style="margin:0">الإصدار 2.0</p>
   </div>
 </main>
 
@@ -674,7 +685,7 @@ details.report summary{min-height:44px;display:flex;align-items:center;color:var
 
 <nav class="nav" id="nav" aria-label="التنقل الرئيسي">
   <a href="#home" data-nav="home"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11l8-7 8 7"/><path d="M6 10v10h12V10"/></svg>الرئيسية</a>
-  <a href="#requests" data-nav="requests"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M8 6h12"/><path d="M8 12h12"/><path d="M8 18h12"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/></svg>طلباتي<span class="badge" id="navBadge" hidden>0</span></a>
+  <a href="#requests" data-nav="requests"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M8 6h12"/><path d="M8 12h12"/><path d="M8 18h12"/><circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/></svg>المحادثات<span class="badge" id="navBadge" hidden>0</span></a>
   <a href="#add" class="addfab" data-nav="add" aria-label="أضف عقار"><span class="fab"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg></span>أضف عقار</a>
   <a href="#mine" data-nav="mine"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-5h4v5"/></svg>عقاراتي</a>
   <a href="#account" data-nav="account"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>حسابي</a>
@@ -987,7 +998,7 @@ drawPhotos();
 function readForm(){
   return {
     type: $("aType").value, deal: A.deal,
-    price: +digits($("aPrice").value), negotiable: $("aNeg").checked, autoApprove: $("aAuto").checked,
+    price: +digits($("aPrice").value), negotiable: $("aNeg").checked,
     city: $("aCity").value.trim(), district: $("aDistrict").value.trim(),
     area: +digits($("aArea").value) || 0, age: digits($("aAge").value) === "" ? null : +digits($("aAge").value),
     rooms: isLand() ? 0 : A.rooms, baths: isLand() ? 0 : A.baths,
@@ -1184,27 +1195,29 @@ function contactBox(l, fee){
     ${hideMap ? `<div class="lockrow"><span><small>الموقع على الخريطة</small><b class="meta">الحي فقط حالياً</b></span>${lockIcon}</div>` : ""}</div>`;
 }
 
+const feeLabel = (deal) => deal === "rent" ? "من قيمة الإيجار السنوي لإكمال الإيجار" : "من قيمة العقار لإكمال البيع";
+function payBar(rid, fee, deal){
+  return `<div class="paybar"><a class="primary" href="#pay-${esc(rid)}">سداد الرسوم 1% للإدارة${fee ? ` (${num(fee)} ريال)` : ""}</a><small>${feeLabel(deal)}</small></div>`;
+}
 function actionBox(l, fee){
-  if (D.mine) return `<div class="status ok">هذا إعلانك.</div><a class="secondary" href="#requests">طلبات المعاينة على عقاراتك</a>`;
+  if (D.mine) return `<div class="status ok">هذا إعلانك.</div><a class="secondary" href="#requests">المحادثات على عقاراتك</a>`;
   if (l.status === "closed" && !D.req) return `<div class="status no">${l.deal === "rent" ? "تم تأجير" : "تم بيع"} هذا العقار.</div>`;
-  if (!currentUser) return `<a class="primary" style="display:flex;align-items:center;justify-content:center;text-decoration:none" href="#login">سجّل دخولك لطلب معاينة</a>`;
+  if (!currentUser) return `<a class="primary" style="display:flex;align-items:center;justify-content:center;text-decoration:none" href="#login">سجّل دخولك للتواصل مع المالك</a>`;
   const r = D.req;
-  if (!r) return `<div class="box" id="reqBox"><h2>طلب معاينة</h2>
-      <p>${l.autoApprove ? "المالك يقبل طلبات المعاينة تلقائياً: بعد ما ترسل طلبك تحوّل الرسوم على طول ويظهر لك جواله بعد التأكيد." : "اقترح وقت يناسبك، والمالك يرد عليك هنا."}</p>
-      <label class="f">الوقت المناسب لك<input id="rTime" type="text" maxlength="60" placeholder="مثال: الخميس بعد العصر"></label>
-      <label class="f">رسالة للمالك (اختياري)<textarea id="rMsg" class="ta" style="min-height:90px" maxlength="300" placeholder="عرّف بنفسك أو اسأل عن العقار. أرقام الجوال والروابط ما تنرسل."></textarea></label>
-      <div class="msg" id="rErr" role="alert"></div>
-      <button type="button" class="primary" id="rSend">أرسل طلب المعاينة</button></div>`;
+  if (!r) return l.status === "active"
+      ? `<button type="button" class="primary" id="rStart">تواصل مع المالك</button>
+         <p class="meta" style="margin:0">تحادث المالك مباشرة، ولما تقرر تكمل تسدد رسوم الخدمة 1% للإدارة ويظهر لك جواله.</p>
+         <div class="msg" id="rErr" role="alert"></div>`
+      : `<div class="status wait">هذا العقار محجوز حالياً.</div>`;
   if (r.status === "pending") return `<div class="status wait">أرسلت طلب معاينة بوقت «${esc(r.proposedTime)}»، وهو بانتظار رد المالك.</div>
       <a class="secondary" href="#chat-${esc(l.id)}_${esc(currentUser.uid)}">المحادثة مع المالك</a>
       <button type="button" class="ghost" id="rCancel">إلغاء الطلب</button>`;
-  if (r.status === "rejected") return `<div class="status no">اعتذر المالك عن طلب المعاينة.</div>`;
+  if (r.status === "rejected") return `<div class="status no">أوقف المالك المحادثة على هذا العقار.</div>`;
   const rid = `${l.id}_${currentUser.uid}`;
   const chatBtn = `<a class="secondary" href="#chat-${esc(rid)}">المحادثة مع المالك</a>`;
   if (r.status === "paySubmitted") return `<div class="status wait">أرسلت إيصال تحويل ${num(fee)} ريال، والإدارة تراجعه. أول ما يتأكد التحويل يظهر لك جوال المالك.</div>${chatBtn}`;
-  if (r.status === "approved") return `${r.payNote ? `<div class="status no">ما تأكد تحويلك السابق: ${esc(r.payNote)}</div>` : ""}<div class="status ok">وافق المالك على طلب المعاينة. حوّل رسوم الخدمة ${num(fee)} ريال (1%) وارفع الإيصال، ويظهر لك جواله${l.locationVisibility !== "public" ? " والموقع" : ""} بعد التأكيد.</div>
-      <a class="primary" style="display:flex;align-items:center;justify-content:center;text-decoration:none" href="#pay-${esc(rid)}">ادفع ${num(fee)} ريال وأظهر الجوال</a>
-      ${chatBtn}
+  if (r.status === "approved") return `${r.payNote ? `<div class="status no">ما تأكد تحويلك السابق: ${esc(r.payNote)}</div>` : ""}${chatBtn}
+      ${payBar(rid, fee, l.deal)}
       <p class="meta" style="margin:0">في الإيجار تُحسب النسبة من الإيجار السنوي. تُسترد كاملة إذا أنهى المالك الصفقة، ولا تُسترد إذا انسحب المشتري.</p>`;
   if (r.status === "paid") return `<div class="status ok">تأكد تحويلك، وصارت بيانات المالك ظاهرة لك فوق.</div>${notaryBox(l.number)}${chatBtn}`;
   if (r.status === "ownerCancelled") return `<div class="status no">ألغى المالك الصفقة، وتُرد لك رسوم الخدمة كاملة.</div>`;
@@ -1250,22 +1263,17 @@ function contactIssue(raw, prevMine = []){
 const CONTACT_TIP = "التواصل المباشر يتفعّل بعد موافقة المالك ودفع رسوم الخدمة. الأرقام الثانية مثل السعر والمساحة عادي تكتبها.";
 
 function wireActions(l){
-  const send = $("rSend");
-  if (send) send.addEventListener("click", async () => {
-    const time = $("rTime").value.trim(), msgEl = $("rErr");
-    if (time.length < 3) return show(msgEl, "اكتب الوقت المناسب لك للمعاينة.");
-    const issue = contactIssue(time) || contactIssue($("rMsg").value);
-    if (issue) return show(msgEl, `${issue} ${CONTACT_TIP}`);
-    send.disabled = true; send.textContent = "جاري الإرسال…";
+  const start = $("rStart");
+  if (start) start.addEventListener("click", async () => {
+    start.disabled = true; start.textContent = "جاري فتح المحادثة…";
+    const rid = `${l.id}_${currentUser.uid}`;
     try {
-      const data = { listingId: l.id, ownerId: l.ownerId, buyerId: currentUser.uid,
+      await setDoc(doc(db, "viewingRequests", rid), { listingId: l.id, ownerId: l.ownerId, buyerId: currentUser.uid,
         buyerName: currentUser.displayName || "", listingTitle: l.title, listingNumber: l.number,
-        proposedTime: time, message: $("rMsg").value.trim(),
-        status: l.autoApprove ? "approved" : "pending", createdAt: serverTimestamp() };
-      await setDoc(doc(db, "viewingRequests", `${l.id}_${currentUser.uid}`), data);
-      if (l.autoApprove) { refreshBadge(); location.hash = `#pay-${l.id}_${currentUser.uid}`; return; }
-      D.req = data; renderDetail();
-    } catch(err){ console.error(err); show(msgEl, "ما قدرنا نرسل الطلب. جرّب مرة ثانية."); send.disabled = false; send.textContent = "أرسل طلب المعاينة"; }
+        proposedTime: "", message: "", status: "approved", createdAt: serverTimestamp() });
+      refreshBadge();
+      location.hash = `#chat-${rid}`;
+    } catch(err){ console.error(err); show($("rErr"), "ما قدرنا نفتح المحادثة. تأكد إنك حدّثت القواعد، وجرّب مرة ثانية."); start.disabled = false; start.textContent = "تواصل مع المالك"; }
   });
   const rep = $("repSend");
   if (rep) rep.addEventListener("click", async () => {
@@ -1287,8 +1295,8 @@ function wireActions(l){
 
 
 /* ---------- طلباتي ---------- */
-const R = { side:"owner", st:"pending", owner:[], buyer:[] };
-const stName = { pending:"بانتظار الرد", approved:"مقبول", paySubmitted:"بانتظار تأكيد التحويل", paid:"مدفوع", rejected:"معتذر عنه", ownerCancelled:"ألغاه المالك" };
+const R = { side:"owner", st:"approved", owner:[], buyer:[] };
+const stName = { pending:"بانتظار ردك", approved:"محادثة مفتوحة", paySubmitted:"بانتظار تأكيد التحويل", paid:"مدفوع", rejected:"موقوفة", ownerCancelled:"ألغاه المالك" };
 const stClass = { pending:"wait", approved:"ok", paySubmitted:"wait", paid:"ok", rejected:"no", ownerCancelled:"no" };
 const whenText = (ts) => {
   if (!ts?.toDate) return "الآن";
@@ -1310,7 +1318,7 @@ async function refreshBadge(){
 }
 function setNavBadge(){
   const n = R.owner.filter(r => r.status === "pending").length
-    + R.buyer.filter(r => r.status === "approved").length
+    + R.buyer.filter(r => r.status === "approved" && r.payNote).length
     + [...R.owner, ...R.buyer].filter(isUnread).length;
   $("reqBadge").hidden = !n; $("reqBadge").textContent = n; $("navBadge").hidden = !n; $("navBadge").textContent = n;
   drawTodo();
@@ -1319,37 +1327,58 @@ function setNavBadge(){
 /* ---------- المطلوب منك (تنبيهات داخل التطبيق) ---------- */
 let ADMIN_TODO = { pay:0, rec:0, rep:0 };
 const recent = (ts, days) => ts?.seconds && (Date.now() / 1000 - ts.seconds) < days * 86400;
+function convState(r, side){
+  const unread = isUnread(r);
+  if (side === "owner"){
+    if (r.status === "pending") return ["بانتظار ردك", "new", true];
+    if (unread) return ["رسالة جديدة", "new", true];
+    if (r.status === "paySubmitted") return ["المشتري سدد، بانتظار التأكيد", "wait", false];
+    if (r.status === "paid") return ["سدد الرسوم ✓", "ok", recent(r.paidAt, 3)];
+    return ["محادثة مفتوحة", "", false];
+  }
+  if (unread) return ["رد المالك", "new", true];
+  if (r.status === "approved") return [r.payNote ? "ارفع إيصال جديد" : "سداد الرسوم 1%", "wait", !!r.payNote];
+  if (r.status === "paySubmitted") return ["بانتظار تأكيد السداد", "wait", false];
+  if (r.status === "paid") return ["اعرض جوال المالك ✓", "ok", recent(r.paidAt, 3)];
+  return ["بانتظار المالك", "", false];
+}
 function drawTodo(){
-  const box = $("todo");
-  if (!currentUser) { box.hidden = true; return; }
-  const items = [];
-  const t = (r) => `«${esc(r.listingTitle || "")}»`;
-  R.owner.filter(r => r.status === "pending").forEach(r => items.push(`<div class="tditem">
-    <span><b>${esc(r.buyerName || "مشتري")}</b> يبي يعاين ${t(r)} — الوقت المقترح: ${esc(r.proposedTime)}</span>
-    <div class="rqact"><button type="button" class="btn-ok" data-tact="approved" data-id="${esc(r.id)}">وافق</button>
-      <button type="button" class="btn-no" data-tact="rejected" data-id="${esc(r.id)}">اعتذر</button></div></div>`));
-  R.buyer.filter(r => r.status === "approved").forEach(r => items.push(`<a class="tditem" href="#pay-${esc(r.id)}">
-    <span>${r.payNote ? `ما تأكد تحويلك على ${t(r)}: ${esc(r.payNote)}` : `وافق المالك على معاينة ${t(r)}. حوّل رسوم الخدمة ويظهر لك جواله.`}</span>
-    <span class="go">${r.payNote ? "ارفع إيصال جديد" : "ادفع الحين"} ←</span></a>`));
-  R.buyer.filter(r => r.status === "paid" && recent(r.paidAt, 3)).forEach(r => items.push(`<a class="tditem blue" href="#listing-${esc(r.listingId)}">
-    <span>تأكد تحويلك على ${t(r)}. جوال المالك صار ظاهر لك، تواصل معه ورتّب المعاينة.</span><span class="go">اعرض الجوال ←</span></a>`));
-  R.owner.filter(r => r.status === "paid" && recent(r.paidAt, 3)).forEach(r => items.push(`<a class="tditem blue" href="#chat-${esc(r.id)}">
-    <span><b>${esc(r.buyerName || "المشتري")}</b> دفع الرسوم على ${t(r)}، وبيتواصل معك على جوالك.</span><span class="go">المحادثة ←</span></a>`));
-  [...R.owner, ...R.buyer].filter(isUnread).forEach(r => items.push(`<a class="tditem blue" href="#chat-${esc(r.id)}">
-    <span>رسالة جديدة في ${t(r)}</span><span class="go">افتح المحادثة ←</span></a>`));
+  const box = $("dbox"), adm = $("todo");
+  if (!currentUser) { box.hidden = true; adm.hidden = true; document.title = "ملاك العقار"; return; }
+  const live = (r) => ["pending","approved","paySubmitted","paid"].includes(r.status);
+  const ts = (r) => (r.lastMsgAt?.seconds || r.paidAt?.seconds || r.createdAt?.seconds || 0);
+  let hot = 0;
+  const col = (side, list, title, icon) => {
+    const rows = list.filter(live).sort((a,b) => ts(b) - ts(a));
+    const items = rows.slice(0, 4).map(r => {
+      const [label, cls, isHot] = convState(r, side); if (isHot) hot++;
+      const who = side === "owner" ? esc(r.buyerName || "مشتري") : `إعلان ${esc(r.listingNumber || "")}`;
+      const href = (side === "buyer" && r.status === "paid") ? `#listing-${esc(r.listingId)}` : `#chat-${esc(r.id)}`;
+      return `<a class="ditem${isHot ? " hot" : ""}" href="${href}"><span>${who} · ${esc(r.listingTitle || "")}</span><span class="st ${cls}">${label}</span></a>`;
+    }).join("");
+    rows.slice(4).forEach(r => { if (convState(r, side)[2]) hot++; });
+    return `<div class="dcol"><h3>${icon} ${title}${rows.length ? ` <span class="badge">${rows.length}</span>` : ""}</h3>
+      ${items || `<p class="dempty">${side === "owner" ? "لما يتواصل معك مشتري تظهر محادثته هنا." : "افتح أي عقار واضغط «تواصل مع المالك»."}</p>`}
+      ${rows.length > 4 ? `<a class="link" href="#requests" data-side-go="${side}">عرض الكل</a>` : ""}</div>`;
+  };
+  box.innerHTML = col("owner", R.owner, "المالك", "🏠") + col("buyer", R.buyer, "المشتري", "🔍");
+  box.hidden = false;
+  const a = [];
   if (IS_ADMIN){
-    const a = [];
-    if (ADMIN_TODO.pay) a.push(`${ADMIN_TODO.pay} تحويل بانتظار التأكيد`);
+    if (ADMIN_TODO.pay) a.push(`${ADMIN_TODO.pay} سداد بانتظار التأكيد`);
     if (ADMIN_TODO.rec) a.push(`${ADMIN_TODO.rec} طلب استعادة حساب`);
     if (ADMIN_TODO.rep) a.push(`${ADMIN_TODO.rep} بلاغ جديد`);
-    if (a.length) items.unshift(`<a class="tditem" href="#admin"><span><b>الإدارة:</b> ${a.join("، ")}</span><span class="go">لوحة الإدارة ←</span></a>`);
   }
-  box.hidden = !items.length;
-  box.innerHTML = `<h2>المطلوب منك <span class="badge">${items.length}</span></h2>${items.slice(0, 6).join("")}
-    ${items.length > 6 ? `<a class="link" href="#requests">عرض الكل (${items.length})</a>` : ""}`;
-  document.title = items.length ? `(${items.length}) ملاك العقار` : "ملاك العقار";
-  try { if (navigator.setAppBadge) items.length ? navigator.setAppBadge(items.length) : navigator.clearAppBadge(); } catch(e){}
+  adm.hidden = !a.length;
+  adm.innerHTML = a.length ? `<a class="tditem" href="#admin"><span><b>الإدارة:</b> ${a.join("، ")}</span><span class="go">لوحة الإدارة ←</span></a>` : "";
+  const n = hot + a.length;
+  document.title = n ? `(${n}) ملاك العقار` : "ملاك العقار";
+  try { if (navigator.setAppBadge) n ? navigator.setAppBadge(n) : navigator.clearAppBadge(); } catch(e){}
 }
+$("dbox").addEventListener("click", (e) => {
+  const g = e.target.closest("[data-side-go]"); if (!g) return;
+  R.side = g.dataset.sideGo;
+});
 $("todo").addEventListener("click", (e) => {
   const b = e.target.closest("[data-tact]"); if (!b) return;
   respondReq(b.dataset.id, b.dataset.tact, b);
@@ -1391,7 +1420,7 @@ async function loadRequests(){
   }
 }
 function drawRequests(){
-  const list = (R.side === "owner" ? R.owner : R.buyer).filter(r => r.status === R.st || (R.st === "approved" && r.status === "paySubmitted"));
+  const list = (R.side === "owner" ? R.owner : R.buyer).filter(r => r.status === R.st || (R.st === "approved" && ["paySubmitted","pending"].includes(r.status)));
   $("rqNote").hidden = R.side !== "owner";
   if (!list.length){
     const empty = R.side === "owner"
@@ -1473,11 +1502,15 @@ async function openChat(reqId){
     const r = await getDoc(doc(db, "viewingRequests", reqId));
     if (!r.exists()) { $("chatList").innerHTML = `<div class="empty"><p>هذي المحادثة غير متاحة، لأن الطلب انلغى.</p></div>`; $("chatForm").hidden = true; return; }
     const req = r.data(); const iAmOwner = req.ownerId === currentUser.uid;
-    C = { reqId, req, iAmOwner };
+    C = { reqId, req, iAmOwner, fee: 0, deal: "sale" };
+    try { const l = await getDoc(doc(db, "listings", req.listingId)); if (l.exists()) { C.fee = Math.round((l.data().price || 0) * FEE); C.deal = l.data().deal; } } catch(e){}
+    if (iAmOwner && req.status === "pending"){   // طلبات قديمة: تنفتح تلقائياً
+      try { await updateDoc(doc(db, "viewingRequests", reqId), { status: "approved", respondedAt: serverTimestamp() }); req.status = "approved"; } catch(e){ console.warn(e); }
+    }
     $("chatWho").textContent = iAmOwner ? (req.buyerName || "المشتري") : "مالك العقار";
     $("chatListing").textContent = `${req.listingTitle} · إعلان ${req.listingNumber}`;
     $("chatListing").href = `#listing-${req.listingId}`;
-    $("chatBack").href = iAmOwner ? "#requests" : `#listing-${req.listingId}`;
+    $("chatBack").href = "#home";
     $("chatForm").hidden = !["pending","approved","paySubmitted","paid"].includes(req.status);
     if (chatUnsub) chatUnsub();
     chatUnsub = onSnapshot(query(collection(db, "chats", reqId, "messages"), orderBy("createdAt")),
@@ -1493,18 +1526,51 @@ function drawChat(msgs){
   const { req, iAmOwner, reqId } = C;
   let html = `<p class="sys">لحماية الطرفين، ممنوع تبادل الجوال أو وسائل التواصل هنا. السعر والمساحة وباقي الأرقام عادي.</p>`;
   if (req.message) html += `<div class="bub ${iAmOwner ? "them" : "me"}">${esc(req.message)}<small>رسالة طلب المعاينة</small></div>`;
-  html += msgs.map(m => `<div class="bub ${m.senderId === currentUser.uid ? "me" : "them"}">${esc(m.text)}<small>${timeOf(m.createdAt)}</small></div>`).join("");
-  if (!iAmOwner && req.status === "approved")
-    html += `<div class="box" style="border-color:var(--brand)"><b style="color:var(--ok)">وافق المالك على المعاينة</b>
-      <p>حوّل رسوم الخدمة 1% وارفع الإيصال، ويظهر لك جوال المالك بعد تأكيد التحويل.</p>
-      <a class="primary" style="display:flex;align-items:center;justify-content:center;text-decoration:none" href="#pay-${esc(reqId)}">ادفع وأظهر الجوال</a></div>`;
+  html += msgs.map(m => {
+    const who = m.senderId === currentUser.uid ? "me" : "them";
+    if (m.loc && /^https:\/\//.test(m.loc)) return `<div class="bub ${who} locmsg">📍 موقع العقار<a href="${esc(m.loc)}" target="_blank" rel="noopener">افتح الموقع على الخريطة</a><small>${timeOf(m.createdAt)}</small></div>`;
+    return `<div class="bub ${who}">${esc(m.text)}<small>${timeOf(m.createdAt)}</small></div>`;
+  }).join("");
+  if (!msgs.length) html += `<p class="sys">${iAmOwner ? "المشتري فتح محادثة على عقارك. رحّب فيه وجاوب على أسئلته." : "ابدأ المحادثة: اسأل المالك عن العقار أو رتّب موعد المعاينة."}</p>`;
+  if (!iAmOwner && req.status === "approved") html += payBar(reqId, C.fee, C.deal);
+  if (iAmOwner && ["approved","pending"].includes(req.status)) html += `<div class="otools">
+      <button type="button" class="loc" id="cLoc">📍 شارك الموقع</button>
+      <button type="button" class="stop" id="cStop">إيقاف المحادثة</button></div>`;
+  if (iAmOwner && req.status === "rejected") html += `<div class="otools"><button type="button" class="loc" id="cResume">استئناف المحادثة</button></div>`;
   if (!iAmOwner && req.status === "paySubmitted") html += `<p class="sys">أرسلت إيصال التحويل، والإدارة تراجعه.</p>`;
   if (req.status === "paid") html += notaryBox(req.listingNumber);
-  if (req.status === "rejected") html += `<p class="sys">اعتذر المالك عن هذا الطلب.</p>`;
+  if (req.status === "rejected") html += `<p class="sys">${iAmOwner ? "أوقفت المحادثة مع هذا المشتري." : "أوقف المالك المحادثة على هذا العقار."}</p>`;
   if (req.status === "ownerCancelled") html += `<p class="sys">ألغى المالك الصفقة.</p>`;
   $("chatList").innerHTML = html;
   window.scrollTo(0, document.body.scrollHeight);
 }
+$("chatList").addEventListener("click", async (e) => {
+  if (!C) return;
+  const t = e.target.closest("#cLoc, #cStop, #cResume"); if (!t) return;
+  try {
+    if (t.id === "cLoc"){
+      let url = "";
+      try { const p = await getDoc(doc(db, "listings", C.req.listingId, "private", "contact")); url = (p.exists() && p.data().mapUrl) || ""; } catch(e){}
+      if (!url){ try { const l = await getDoc(doc(db, "listings", C.req.listingId)); url = (l.exists() && l.data().mapUrl) || ""; } catch(e){} }
+      const ans = prompt("رابط موقع العقار على قوقل ماب (تقدر تغيّره):", url);
+      if (ans === null) return;
+      const link = ans.trim();
+      if (!/^https:\/\/\S+$/.test(link)) return alert("الصق رابط يبدأ بـ https:// من قوقل ماب.");
+      const batch = writeBatch(db);
+      batch.set(doc(collection(db, "chats", C.reqId, "messages")), { senderId: currentUser.uid, text: "📍 موقع العقار", loc: link.slice(0, 500), createdAt: serverTimestamp() });
+      batch.update(doc(db, "viewingRequests", C.reqId), { lastMsgAt: serverTimestamp(), lastMsgBy: currentUser.uid });
+      await batch.commit();
+    } else if (t.id === "cStop"){
+      if (!confirm("توقف المحادثة مع هذا المشتري؟ ما يقدر يرسل لك ولا يسدد الرسوم، وتقدر تستأنفها بعدين.")) return;
+      await updateDoc(doc(db, "viewingRequests", C.reqId), { status: "rejected", respondedAt: serverTimestamp() });
+      C.req.status = "rejected"; $("chatForm").hidden = true; drawChat(C.msgs || []);
+    } else {
+      await updateDoc(doc(db, "viewingRequests", C.reqId), { status: "approved", respondedAt: serverTimestamp() });
+      C.req.status = "approved"; $("chatForm").hidden = false; drawChat(C.msgs || []);
+    }
+    refreshBadge();
+  } catch(err){ console.error(err); alert("ما تم الإجراء. تأكد إنك حدّثت القواعد."); }
+});
 $("chatForm").addEventListener("submit", async (e) => {
   e.preventDefault();
   const raw = $("chatInput").value.trim(); if (!raw || !C) return;
@@ -1552,7 +1618,8 @@ async function openPay(reqId){
       <div class="box paylines">
         <div><span>${rent ? "الإيجار السنوي" : "سعر العقار"}</span><span>${num(l.price)} ريال</span></div>
         <div><span>نسبة الخدمة</span><span>1%</span></div>
-        <div class="total"><span>المبلغ المطلوب تحويله</span><span>${num(fee)} ريال</span></div>
+        <div class="total"><span>رسوم الخدمة للإدارة</span><span>${num(fee)} ريال</span></div>
+      </div><p class="meta" style="margin:0;text-align:center">${feeLabel(l.deal)}</p><div style="display:none">
       </div>
       ${hasBank ? `<div class="box">
         <h2>حوّل المبلغ على</h2>
@@ -1581,7 +1648,7 @@ async function openPay(reqId){
       </div>
       <label class="check"><input id="payOk" type="checkbox">قرأت سياسة الاسترداد وأوافق على شروط الخدمة.</label>
       <div class="msg" id="payMsg" role="alert"></div>
-      <button type="button" class="primary" id="payBtn" ${hasBank ? "" : "disabled"}>أرسل الإيصال للتأكيد</button>`;
+      <button type="button" class="primary" id="payBtn" ${hasBank ? "" : "disabled"}>أرسل إيصال السداد للتأكيد</button>`;
     let receipt = "";
     $("payPick").addEventListener("click", () => $("payFile").click());
     $("payFile").addEventListener("change", async (e) => {
@@ -1784,7 +1851,7 @@ async function openEdit(id){
     const priv = p.exists() ? p.data() : {};
     $("eNum").textContent = `إعلان ${E.number}`;
     $("ePriceLabel").textContent = E.deal === "rent" ? "الإيجار السنوي (ريال)" : "السعر (ريال)";
-    $("eTitle").value = E.title || ""; $("ePrice").value = E.price || ""; $("eNeg").checked = !!E.negotiable; $("eAuto").checked = !!E.autoApprove;
+    $("eTitle").value = E.title || ""; $("ePrice").value = E.price || ""; $("eNeg").checked = !!E.negotiable;
     if (!$("eType").options.length) $("eType").innerHTML = $("aType").innerHTML;
     $("eType").value = E.type || ""; setEDeal(E.deal || "sale");
     $("eCity").value = E.city || ""; $("eDistrict").value = E.district || "";
@@ -1825,7 +1892,7 @@ $("editForm").addEventListener("submit", async (e) => {
       type, deal: E.deal, city, district, area: +digits($("eArea").value) || 0,
       age: ageTxt === "" ? null : +ageTxt, rooms: land ? 0 : (+digits($("eRooms").value) || 0), baths: land ? 0 : (+digits($("eBaths").value) || 0),
       thumb, photoCount: E.photos.length,
-      title, price, negotiable: $("eNeg").checked, autoApprove: $("eAuto").checked, description: $("eDesc").value.trim(), videoUrl,
+      title, price, negotiable: $("eNeg").checked, description: $("eDesc").value.trim(), videoUrl,
       adLicense: digits($("eLicense").value), locationVisibility: vis, mapUrl: vis === "public" ? mapUrl : "",
       sendToWasata: $("eWasata").checked });
     batch.set(doc(db, "listings", E.id, "private", "contact"), { phone, mapUrl: vis === "public" ? "" : mapUrl });
