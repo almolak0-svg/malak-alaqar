@@ -637,7 +637,7 @@ details.report summary{min-height:44px;display:flex;align-items:center;color:var
       <a href="#refund">سياسة رسوم الخدمة والاسترداد</a>
       <button type="button" class="danger" id="acOut">تسجيل الخروج</button>
     </div>
-    <p class="meta center" style="margin:0">الإصدار 2.5</p>
+    <p class="meta center" style="margin:0">الإصدار 2.6</p>
   </div>
 </main>
 
@@ -1247,16 +1247,38 @@ function splitNumWord(w){
   }
   return out.length >= 2 ? out.join("") : null;
 }
+// تكرار الأرقام: «أربع خمسات»، «خمستين»، «دبل سبعة»
+const DPLUR = { "صفار":0,"اصفار":0,"صفرات":0,"واحدات":1,"وحدات":1,"اثنينات":2,"ثنينات":2,"ثلاثات":3,"تلاتات":3,"ثلاثيات":3,
+  "اربعات":4,"خمسات":5,"ستات":6,"سبعات":7,"ثمانيات":8,"ثمنات":8,"تمانيات":8,"ثمانات":8,"تسعات":9 };
+const DDUAL = { "صفرين":0,"صفرتين":0,"واحدين":1,"واحدتين":1,"وحدتين":1,"ثلاثتين":3,"ثلثتين":3,"تلاتتين":3,"اربعتين":4,"اربعين اربعه":4,
+  "خمستين":5,"خمسيتين":5,"ستتين":6,"سيتتين":6,"سبعتين":7,"ثمانيتين":8,"ثمنتين":8,"تمنتين":8,"ثمانتين":8,"تسعتين":9 };
+const DMULT = { "اثنين":2,"ثنتين":2,"ثلاث":3,"ثلاثه":3,"تلات":3,"تلاته":3,"اربع":4,"اربعه":4,"خمس":5,"خمسه":5,"ست":6,"سته":6,
+  "سبع":7,"سبعه":7,"ثمان":8,"ثماني":8,"ثمنيه":8,"تسع":9,"تسعه":9,"عشر":10 };
+const RX = (words) => Object.keys(words).sort((a,b) => b.length - a.length).join("|");
+const RX_MULT = new RegExp(`(^|[^\\p{L}])و?(${RX(DMULT)})\\s+و?(${RX(DPLUR)})(?=[^\\p{L}]|$)`, "gu");
+const RX_PLUR = new RegExp(`(^|[^\\p{L}])و?(${RX(DPLUR)})(?=[^\\p{L}]|$)`, "gu");
+const RX_DUAL = new RegExp(`(^|[^\\p{L}])و?(${RX(DDUAL)})(?=[^\\p{L}]|$)`, "gu");
+function expandRepeats(n){
+  return n.replace(RX_MULT, (m, pre, k, d) => `${pre} ${String(DPLUR[d]).repeat(DMULT[k])} `)
+          .replace(RX_PLUR, (m, pre, d) => `${pre} ${String(DPLUR[d]).repeat(3)} `)
+          .replace(RX_DUAL, (m, pre, d) => `${pre} ${String(DDUAL[d]).repeat(2)} `);
+}
 function numNorm(t){
   let n = String(t || "").toLowerCase()
     .replace(/[\u064B-\u0652\u0640]/g, "").replace(/[أإآ]/g, "ا").replace(/ة/g, "ه").replace(/ى/g, "ي")
     .replace(/[٠-٩]/g, d => "٠١٢٣٤٥٦٧٨٩".indexOf(d)).replace(/[۰-۹]/g, d => "۰۱۲۳۴۵۶۷۸۹".indexOf(d));
+  n = expandRepeats(n);
   n = n.replace(/\p{L}+/gu, w => {
     let k = w; if (!(k in NUMW) && k.startsWith("و") && (k.slice(1) in NUMW)) k = k.slice(1);
     if (k in NUMW) return ` ${NUMW[k]} `;
     const glued = w.length >= 6 ? splitNumWord(w) : null;
     return glued ? ` ${glued} ` : w;
   });
+  n = n.replace(/(^|[^\p{L}])(دبل|دبول|double)\s*(\d)/gu, "$1 $3$3 ")
+       .replace(/(^|[^\p{L}])(تربل|تريبل|triple)\s*(\d)/gu, "$1 $3$3$3 ")
+       .replace(/(\d)\s*(مرتين|مرتان)(?=[^\p{L}]|$)/gu, "$1$1 ")
+       .replace(/(\d)\s*(ثلاث|تلات|3)\s*مرات(?=[^\p{L}]|$)/gu, "$1$1$1 ")
+       .replace(/(\d)\s*(اربع|4)\s*مرات(?=[^\p{L}]|$)/gu, "$1$1$1$1 ");
   return n.replace(/(\d)[^\p{L}\d]+(?=\d)/gu, "$1");   // يجمع الأرقام المفصولة بمسافات أو رموز
 }
 const phoneRun = (r) => r.length >= 11 || (r.length >= 9 && /^(0|5|966|00)/.test(r));
@@ -1270,7 +1292,7 @@ function contactIssue(raw, prevMine = []){
   if ((n.match(/\d+/g) || []).some(phoneRun)) return "رسالتك فيها رقم جوال.";
   // أرقام كثيرة مكتوبة بالحروف (مثل إملاء الجوال بالعشرات والمئات)
   const raw0 = String(raw || "").toLowerCase().replace(/[\u064B-\u0652\u0640]/g, "").replace(/[أإآ]/g, "ا").replace(/ة/g, "ه").replace(/ى/g, "ي");
-  const numWords = raw0.split(/[^\p{L}]+/u).filter(w => w && ((w in NUMW) || (w.startsWith("و") && (w.slice(1) in NUMW)) || NUMBIG.test(w))).length;
+  const numWords = raw0.split(/[^\p{L}]+/u).filter(w => w && ((w in NUMW) || (w.startsWith("و") && (w.slice(1) in NUMW)) || NUMBIG.test(w) || (w.replace(/^و/, "") in DPLUR) || (w.replace(/^و/, "") in DDUAL) || /^(دبل|تربل|مرتين|مرات)$/.test(w))).length;
   if (numWords >= 6) return "رسالتك فيها أرقام كثيرة مكتوبة بالحروف، ويبان إنها رقم جوال.";
   if (numberish(raw)) {   // رقم مقسّم على أكثر من رسالة
     const trail = [];
