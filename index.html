@@ -218,8 +218,18 @@ textarea.ta{min-height:140px;padding:12px 14px;border-radius:12px;border:1px sol
 .bub.them{align-self:flex-end;background:var(--raised);border:1px solid var(--line);border-radius:16px 16px 16px 4px}
 .bub.them small{color:var(--muted)}
 .chatbar{position:sticky;bottom:0;display:flex;gap:8px;align-items:center;padding:10px 0 calc(14px + env(safe-area-inset-bottom,0px));background:var(--surface);border-top:1px solid var(--line);margin-top:0}
-.chatbar input{flex:1;min-width:0;height:48px;padding:0 16px;border-radius:24px;border:1px solid var(--line);background:var(--raised);color:var(--ink)}
-.chatbar button{width:48px;height:48px;border-radius:999px;border:none;background:var(--brand);display:flex;align-items:center;justify-content:center;cursor:pointer}
+.chatbar input{flex:1;min-width:0;height:56px;padding:0 18px;font-size:16px;border-radius:28px;border:1px solid var(--line);background:var(--raised);color:var(--ink)}
+.chatbar button{flex:none;width:56px;height:56px;border-radius:50%;border:none;background:var(--brand);display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 0 0 4px #CDE8E6}
+.chatbar button svg{width:24px;height:24px;transform:scaleX(-1)}
+#view-chat.wrap{max-width:860px}
+#view-chat .chatframe{background:#FBF8F2;border:1.5px solid #D9CDB6;border-radius:24px;padding:14px 14px 0;margin-top:10px;box-shadow:0 4px 18px rgba(27,47,91,.06)}
+#view-chat .chathead{padding:0 0 12px;border-bottom:1px solid var(--line)}
+#view-chat .chatbar{background:#FBF8F2;align-items:flex-end;border-top:1px solid var(--line);padding:12px 0 calc(14px + env(safe-area-inset-bottom,0px))}
+#view-chat .chatbar textarea{flex:1;min-width:0;min-height:96px;max-height:240px;padding:14px 18px;font:inherit;font-size:16px;line-height:26px;border-radius:20px;border:1.5px solid var(--line);background:var(--raised);color:var(--ink);resize:none}
+#view-chat .chatbar textarea:focus{outline:none;border-color:var(--brand)}
+#view-chat .chatlist{background:var(--raised);border:1px solid var(--line);border-radius:20px;padding:16px 14px;min-height:62vh;margin:12px 0}
+#view-chat .bub{font-size:16px;line-height:25px;max-width:85%;padding:12px 14px}
+
 /* pay */
 .paylines{display:flex;flex-direction:column;gap:8px}
 .paylines div{display:flex;justify-content:space-between;font-size:14px;color:var(--muted)}
@@ -451,7 +461,7 @@ details.report summary{min-height:44px;display:flex;align-items:center;color:var
     </div>
     <div class="box lock">
       <h2>رقمك يظهر بعد سداد الرسوم فقط</h2>
-      <p>ما يشوف رقمك إلا المشتري اللي يسدد رسوم الخدمة 1% للإدارة.</p>
+      <p>ما يشوف رقمك إلا المشتري اللي يسدد رسوم الخدمة 2.5% للإدارة.</p>
       <label class="f">جوال / واتساب<input id="aPhone" type="tel" inputmode="numeric" placeholder="05xxxxxxxx"></label>
     </div>
     <!-- مخفي مؤقتاً لين يتفعّل الربط مع وسطاء المملكة -->
@@ -510,12 +520,13 @@ details.report summary{min-height:44px;display:flex;align-items:center;color:var
     <button type="button" data-st="rejected" aria-pressed="false">موقوفة</button>
     <button type="button" data-st="ownerCancelled" aria-pressed="false">ملغاة</button>
   </div>
-  <p class="status wait" id="rqNote" style="margin:12px 0 0">المشتري يسدد رسوم الخدمة (1%) للإدارة.<br>في حال تم إلغاء البيع من طرف المالك تُسترد الرسوم فقط.</p>
+  <p class="status wait" id="rqNote" style="margin:12px 0 0">المشتري يسدد رسوم الخدمة (2.5%) للإدارة.<br>في حال تم إلغاء البيع من طرف المالك تُسترد الرسوم فقط.</p>
   <div class="rqlist" id="rqList"><p class="meta">جاري تحميل الطلبات…</p></div>
 </main>
 
 <!-- ============ المحادثة ============ -->
 <main id="view-chat" class="view wrap">
+ <div class="chatframe">
   <div class="chathead">
     <a class="iconbtn" id="chatBack" href="#requests" aria-label="رجوع">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1B2F5B" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>
@@ -524,9 +535,10 @@ details.report summary{min-height:44px;display:flex;align-items:center;color:var
   </div>
   <div class="chatlist" id="chatList" aria-live="polite"></div>
   <form class="chatbar" id="chatForm">
-    <input id="chatInput" type="text" maxlength="500" placeholder="اكتب رسالتك…" aria-label="رسالة" autocomplete="off">
+    <textarea id="chatInput" maxlength="500" rows="3" placeholder="اكتب رسالتك…" aria-label="رسالة" autocomplete="off"></textarea>
     <button type="submit" aria-label="إرسال"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 3L10 14"/><path d="M21 3l-7 18-4-7-7-4z"/></svg></button>
   </form>
+ </div>
 </main>
 
 <!-- ============ الدفع ============ -->
@@ -637,7 +649,7 @@ details.report summary{min-height:44px;display:flex;align-items:center;color:var
       <a href="#refund">سياسة رسوم الخدمة والاسترداد</a>
       <button type="button" class="danger" id="acOut">تسجيل الخروج</button>
     </div>
-    <p class="meta center" style="margin:0">الإصدار 2.7</p>
+    <p class="meta center" style="margin:0">الإصدار 3.1</p>
   </div>
 </main>
 
@@ -678,7 +690,7 @@ details.report summary{min-height:44px;display:flex;align-items:center;color:var
 <main id="view-refund" class="view wrap legal">
   <div class="formtop"><a class="iconbtn" href="javascript:history.back()" aria-label="رجوع"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1B2F5B" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a><h1>رسوم الخدمة والاسترداد</h1></div>
   <p class="draft">مسودة أولية للتجربة. لازم يراجعها محامٍ أو مستشار نظامي قبل الإطلاق.</p>
-  <h2>قيمة الرسوم</h2><ul><li>البيع: 1% من سعر العقار المعلن.</li><li>الإيجار: 1% من قيمة الإيجار السنوي.</li></ul>
+  <h2>قيمة الرسوم</h2><ul><li>البيع: 2.5% من سعر العقار المعلن.</li><li>الإيجار: 2.5% من قيمة الإيجار السنوي.</li></ul>
   <h2>متى تُدفع وكيف</h2><p>بعد موافقة المالك على طلب المعاينة، يحوّل المشتري الرسوم تحويلاً بنكياً أو عبر STC Pay ويرفع صورة إيصال التحويل. بعد تأكيد الإدارة للتحويل يظهر جوال المالك (والموقع الدقيق إذا كان مقفلاً).</p>
   <h2>الاسترداد</h2><ul><li>تُسترد كاملة إذا أنهى المالك الصفقة من جهته.</li><li>لا تُسترد إذا انسحب المشتري أو المستأجر بعد الدفع.</li></ul>
 </main>
@@ -1099,7 +1111,7 @@ async function publish(){
 
 /* ---------- تفاصيل العقار وطلب المعاينة ---------- */
 let D = null; // العقار المفتوح
-const FEE = 0.01;
+const FEE = 0.025;
 async function openListing(id){
   $("detail").innerHTML = `<p class="meta" style="padding:24px 0">جاري تحميل العقار…</p>`;
   try {
@@ -1190,14 +1202,14 @@ function contactBox(l, fee){
   }
   const hideMap = l.locationVisibility !== "public";
   return `<div class="box lock"><h2>بيانات المالك مقفلة</h2>
-    <p>جوال المالك${hideMap ? " والموقع الدقيق يظهرون" : " يظهر"} لك بعد موافقته على المعاينة ودفع رسوم الخدمة 1% (${num(fee)} ريال لهذا العقار).</p>
+    <p>جوال المالك${hideMap ? " والموقع الدقيق يظهرون" : " يظهر"} لك بعد سداد رسوم الخدمة 2.5% (${num(fee)} ريال لهذا العقار).</p>
     <div class="lockrow"><span><small>جوال / واتساب المالك</small><b class="meta" style="letter-spacing:2px">•••• ••• •••</b></span>${lockIcon}</div>
     ${hideMap ? `<div class="lockrow"><span><small>الموقع على الخريطة</small><b class="meta">الحي فقط حالياً</b></span>${lockIcon}</div>` : ""}</div>`;
 }
 
 const feeLabel = (deal) => deal === "rent" ? "من قيمة الإيجار السنوي لإكمال الإيجار" : "من قيمة العقار لإكمال البيع";
 function payBar(rid, fee, deal){
-  return `<div class="paybar"><a class="primary" href="#pay-${esc(rid)}">سداد الرسوم 1% للإدارة${fee ? ` (${num(fee)} ريال)` : ""}</a><small>${feeLabel(deal)}</small></div>`;
+  return `<div class="paybar"><a class="primary" href="#pay-${esc(rid)}">سداد الرسوم 2.5% للإدارة${fee ? ` (${num(fee)} ريال)` : ""}</a><small>${feeLabel(deal)}</small></div>`;
 }
 function actionBox(l, fee){
   if (D.mine) return `<div class="status ok">هذا إعلانك.</div><a class="secondary" href="#requests">المحادثات على عقاراتك</a>`;
@@ -1206,7 +1218,7 @@ function actionBox(l, fee){
   const r = D.req;
   if (!r) return l.status === "active"
       ? `<button type="button" class="primary" id="rStart">تواصل مع المالك</button>
-         <p class="meta" style="margin:0">تحادث المالك مباشرة، ولما تقرر تكمل تسدد رسوم الخدمة 1% للإدارة ويظهر لك جواله.</p>
+         <p class="meta" style="margin:0">تحادث المالك مباشرة، ولما تقرر تكمل تسدد رسوم الخدمة 2.5% للإدارة ويظهر لك جواله.</p>
          <div class="msg" id="rErr" role="alert"></div>`
       : `<div class="status wait">هذا العقار محجوز حالياً.</div>`;
   if (r.status === "pending") return `<div class="status wait">أرسلت طلب معاينة بوقت «${esc(r.proposedTime)}»، وهو بانتظار رد المالك.</div>
@@ -1417,7 +1429,7 @@ function convState(r, side){
     return ["محادثة مفتوحة", "", false];
   }
   if (unread) return ["رد المالك", "new", true];
-  if (r.status === "approved") return [r.payNote ? "ارفع إيصال جديد" : "سداد الرسوم 1%", "wait", !!r.payNote];
+  if (r.status === "approved") return [r.payNote ? "ارفع إيصال جديد" : "سداد الرسوم 2.5%", "wait", !!r.payNote];
   if (r.status === "paySubmitted") return ["بانتظار تأكيد السداد", "wait", false];
   if (r.status === "paid") return ["اعرض جوال المالك ✓", "ok", recent(r.paidAt, 3)];
   return ["بانتظار المالك", "", false];
@@ -1526,7 +1538,7 @@ function ownerCard(r){
       <span class="who"><b>${esc(name)}</b><span class="meta">${whenText(r.createdAt)}</span></span>
       <span class="pill ${stClass[r.status] || "wait"}">${stName[r.status] || r.status}</span></div>
     <a class="meta" href="#listing-${esc(r.listingId)}">${esc(r.listingTitle)} · إعلان ${esc(r.listingNumber)}</a>
-    <div style="font-size:14px">الوقت المقترح: <b>${esc(r.proposedTime)}</b></div>
+    ${r.proposedTime ? `<div style="font-size:14px">الوقت المقترح: <b>${esc(r.proposedTime)}</b></div>` : ""}
     ${r.message ? `<p class="rqmsg">${esc(r.message)}</p>` : ""}
     ${acts}</article>`;
 }
@@ -1698,7 +1710,7 @@ async function openPay(reqId){
       </div>
       <div class="box paylines">
         <div><span>${rent ? "الإيجار السنوي" : "سعر العقار"}</span><span>${num(l.price)} ريال</span></div>
-        <div><span>نسبة الخدمة</span><span>1%</span></div>
+        <div><span>نسبة الخدمة</span><span>2.5%</span></div>
         <div class="total"><span>رسوم الخدمة للإدارة</span><span>${num(fee)} ريال</span></div>
       </div><p class="meta" style="margin:0;text-align:center">${feeLabel(l.deal)}</p><div style="display:none">
       </div>
@@ -2344,6 +2356,10 @@ async function checkBanned(){
   try { BANNED = (await getDoc(doc(db, "banned", currentUser.uid))).exists(); } catch(e){ BANNED = false; }
   if (BANNED){ const t = $("todo"); t.hidden = false; t.innerHTML = `<div class="status no">حسابك موقوف من الإدارة بسبب مخالفة شروط الاستخدام. ما تقدر تنشر إعلانات أو ترسل رسايل.</div>`; }
 }
+
+/* ---------- خانة الكتابة تكبر مع النص ---------- */
+$("chatInput").addEventListener("input", (e) => { const t = e.target; t.style.height = "auto"; t.style.height = Math.min(240, Math.max(96, t.scrollHeight)) + "px"; });
+$("chatForm").addEventListener("submit", () => setTimeout(() => { $("chatInput").style.height = ""; }, 0));
 
 /* ---------- لوحة الإدارة ---------- */
 let AD = { tab:"pay" };
