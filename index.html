@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#F5EFE4">
+<meta name="theme-color" content="#0A5457">
 <title>ملاك العقار</title>
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="apple-touch-icon.png?v=2">
@@ -17,7 +17,7 @@
 <style>
 :root{
   --brand:#0D7377; --on-brand:#FFFFFF; --brand-soft:#DDF1EF; --brand-bright:#3CBFBA;
-  --gold:#C9A267; --gold-text:#7A5A1F; --surface:#F5EFE4; --raised:#FFFFFF;
+  --gold:#C9A267; --gold-text:#7A5A1F; --surface:#F4F2EC; --raised:#FFFFFF;
   --ink:#1B2F5B; --muted:#5B6478; --line:#E6DCCB; --ok:#2E7D4F; --danger:#B3261E;
   --kufi:"Noto Kufi Arabic","IBM Plex Sans Arabic",system-ui,sans-serif;
   --sans:"IBM Plex Sans Arabic",system-ui,sans-serif;
@@ -39,6 +39,17 @@ a{color:var(--brand)}
 
 /* home */
 .hello{margin:8px 0 14px}
+html,body{overflow-x:hidden}
+.hero{position:relative;overflow:hidden;margin:0 calc(50% - 50vw) 16px;padding:12px max(16px, calc(50vw - 264px)) 22px;background:#0A5457;border-radius:0 0 28px 28px}
+.hero .deco{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.hero > :not(.deco){position:relative}
+.hero .top{flex-direction:column;justify-content:center;padding:44px 0 6px}
+.hero .top img{width:168px;height:120px;border-radius:20px;border:3px solid #C9A267;box-shadow:0 0 0 6px rgba(201,162,103,.18)}
+.hero .topbtns{position:absolute;top:0;left:0}
+.hero .iconbtn{text-decoration:none;background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.35);color:#FFFFFF}
+.hero .hello{text-align:center;margin:10px 0 0}
+.hero .hello p{color:#BFE3E1}
+.hero .hello h1{color:#FFFFFF}
 .dbox{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;margin:14px 0}
 .dcol{background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:10px;display:flex;flex-direction:column;gap:8px;min-height:120px;background:#EFE6D6}
 .dcol h3{margin:0;font-size:15px;color:var(--ink);display:flex;align-items:center;gap:6px}
@@ -290,6 +301,22 @@ details.report summary{min-height:44px;display:flex;align-items:center;color:var
 
 <!-- ============ الرئيسية ============ -->
 <main id="view-home" class="view wrap">
+  <section class="hero">
+  <svg class="deco" viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <g fill="none" stroke="#FFFFFF">
+      <polygon points="200,-20 430,150 200,320 -30,150" stroke-opacity=".10"/>
+      <rect x="105" y="18" width="190" height="264" stroke-opacity=".08"/>
+      <circle cx="200" cy="118" r="78" stroke-opacity=".16"/>
+      <circle cx="200" cy="118" r="112" stroke-opacity=".12" stroke-dasharray="4 7"/>
+      <circle cx="200" cy="118" r="150" stroke-opacity=".09"/>
+      <circle cx="200" cy="118" r="196" stroke-opacity=".07" stroke-dasharray="2 9"/>
+      <path d="M-20 70 Q 60 40 120 120" stroke-opacity=".08"/>
+      <path d="M420 70 Q 340 40 280 120" stroke-opacity=".08"/>
+    </g>
+    <circle cx="200" cy="118" r="62" fill="none" stroke="#C9A267" stroke-opacity=".45"/>
+    <path d="M0 262 C 90 236 160 282 240 258 S 360 240 400 252 L400 300 L0 300 Z" fill="#FFFFFF" fill-opacity=".05"/>
+    <path d="M0 280 C 110 258 180 296 270 276 S 370 266 400 272 L400 300 L0 300 Z" fill="#FFFFFF" fill-opacity=".05"/>
+  </svg>
   <header class="top">
     <img src="logo.jpg?v=2" alt="ملاك العقار">
     <div class="topbtns">
@@ -300,6 +327,7 @@ details.report summary{min-height:44px;display:flex;align-items:center;color:var
   <section class="hello">
     <p id="helloName">مرحباً بك</p>
     <h1>عقارك من مالكه… مباشرة</h1>
+  </section>
   </section>
   <div class="searchrow">
   <label class="search">
@@ -649,7 +677,7 @@ details.report summary{min-height:44px;display:flex;align-items:center;color:var
       <a href="#refund">سياسة رسوم الخدمة والاسترداد</a>
       <button type="button" class="danger" id="acOut">تسجيل الخروج</button>
     </div>
-    <p class="meta center" style="margin:0">الإصدار 3.2</p>
+    <p class="meta center" style="margin:0">الإصدار 3.3</p>
   </div>
 </main>
 
