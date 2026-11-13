@@ -677,7 +677,7 @@ details.report summary{min-height:44px;display:flex;align-items:center;color:var
       <a href="#refund">سياسة رسوم الخدمة والاسترداد</a>
       <button type="button" class="danger" id="acOut">تسجيل الخروج</button>
     </div>
-    <p class="meta center" style="margin:0">الإصدار 3.5</p>
+    <p class="meta center" style="margin:0">الإصدار 3.6</p>
   </div>
 </main>
 
@@ -692,7 +692,6 @@ details.report summary{min-height:44px;display:flex;align-items:center;color:var
   <div class="formtop">
     <a class="iconbtn" href="#account" aria-label="رجوع"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1B2F5B" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a>
     <h1>لوحة الإدارة</h1>
-    <a class="iconbtn" href="offers.html" style="margin-inline-start:auto;text-decoration:none;font-size:13px">نموذج العروض</a>
   </div>
   <div class="seg" id="adTabs"><button type="button" data-ad="pay" aria-pressed="true">التحويلات</button><button type="button" data-ad="rec" aria-pressed="false">الاستعادة</button><button type="button" data-ad="open" aria-pressed="false">البلاغات</button><button type="button" data-ad="hidden" aria-pressed="false">المخفية</button><button type="button" data-ad="deleted" aria-pressed="false">التنظيف</button><button type="button" data-ad="banned" aria-pressed="false">المحظورة</button><button type="button" data-ad="bank" aria-pressed="false">الحساب</button></div>
   <div class="rqlist" id="adList"><p class="meta">جاري التحميل…</p></div>
@@ -754,14 +753,7 @@ const $ = (id) => document.getElementById(id);
 
 /* ---------- التنقل بين الشاشات ---------- */
 function route(){
-  let name = (location.hash || "#home").slice(1);
-  // استيراد عرض من نموذج «تقديم العروض» (رابط فيه البيانات)
-  if (name.startsWith("add?")) {
-    const raw = new URLSearchParams(name.slice(4)).get("d");
-    if (raw) { try { sessionStorage.setItem("malakImport", raw); } catch(e){} }
-    if (!currentUser) { location.hash = "#login"; return; }
-    history.replaceState(null, "", "#add"); name = "add";
-  }
+  const name = (location.hash || "#home").slice(1);
   let v = ["home","login","signup","forgot","add","requests","mine","account","admin","terms","privacy","refund","favs"].includes(name) ? name : "home";
   if (v === "favs" && !currentUser) { location.hash = "#login"; return; }
   if (v === "favs") loadFavs();
@@ -783,7 +775,7 @@ function route(){
   }
   if (v !== "chat" && typeof chatUnsub === "function") { chatUnsub(); chatUnsub = null; }
   if (v === "add" && !currentUser) { location.hash = "#login"; return; }
-  if (v === "add") { startAdd(); applyImport(); }
+  if (v === "add") startAdd();
   document.querySelectorAll(".view").forEach(el => el.classList.toggle("on", el.id === "view-" + v));
   document.body.classList.toggle("hasnav", !!currentUser && ["home","requests","mine","account"].includes(v));
   document.querySelectorAll("[data-nav]").forEach(a => a.toggleAttribute("aria-current", a.dataset.nav === v));
@@ -805,8 +797,7 @@ onAuthStateChanged(auth, (user) => {
     btn.textContent = "خروج"; btn.href = "#home";
     $("reqBtn").hidden = true; btn.hidden = true; Promise.all([loadUserDoc(), loadNotary()]).then(() => { refreshBadge(); render(); checkBanned(); }); checkAdmin();
     btn.onclick = async (e) => { e.preventDefault(); await signOut(auth); };
-    let pend = null; try { pend = sessionStorage.getItem("malakImport"); } catch(e){}
-    if (["#login","#signup","#forgot"].includes(location.hash)) location.hash = pend ? "#add" : "#home";
+    if (["#login","#signup","#forgot"].includes(location.hash)) location.hash = "#home";
     syncIndex(user);
   } else {
     $("helloName").textContent = "مرحباً بك";
@@ -2548,29 +2539,6 @@ $("ePhInput").addEventListener("change", async (e) => {
   }
   e.target.value = "";
 });
-
-/* ---------- استيراد عرض من نموذج «تقديم العروض» ---------- */
-function applyImport(){
-  let raw = null; try { raw = sessionStorage.getItem("malakImport"); sessionStorage.removeItem("malakImport"); } catch(e){}
-  if (!raw) return;
-  let d;
-  try { d = JSON.parse(decodeURIComponent(escape(atob(raw.replace(/-/g, "+").replace(/_/g, "/"))))); }
-  catch(e){ show($("addMsg"), "رابط النقل غير صالح. عبّي البيانات يدوياً."); return; }
-  resetAdd();
-  const sel = $("aType"), opt = [...sel.options].find(o => o.value && (o.value === d.t || o.textContent === d.t));
-  sel.value = opt ? opt.value : (d.t ? "أخرى" : "");
-  $("roomsRow").hidden = isLand();
-  const dealBtn = $("aDeal").querySelector(`[data-deal="${d.d === "rent" ? "rent" : "sale"}"]`); if (dealBtn) dealBtn.click();
-  const n = (v) => String(v || "").replace(/[^\d]/g, "");
-  $("aPrice").value = n(d.p); $("aArea").value = n(d.a); $("aAge").value = n(d.g);
-  $("aCity").value = d.c || ""; $("aDistrict").value = d.n || ""; $("aMap").value = d.m || "";
-  A.rooms = Math.min(50, +n(d.r) || 0); A.baths = Math.min(50, +n(d.b) || 0); $("rooms").textContent = A.rooms; $("baths").textContent = A.baths;
-  const typeName = sel.value && sel.value !== "أخرى" ? sel.value : (d.t || "عقار");
-  $("aTitle").value = `${typeName} ${d.d === "rent" ? "للإيجار" : "للبيع"}${d.n ? " في " + d.n : (d.c ? " في " + d.c : "")}`.slice(0, 60);
-  const desc = [d.s || "", d.i ? `الدخل السنوي: ${n(d.i)} ريال` : ""].filter(Boolean).join("\n");
-  $("aDesc").value = desc.slice(0, 1000); $("descCount").textContent = `${$("aDesc").value.length} / 1000`;
-  show($("addMsg"), "انتقلت بيانات العرض من نموذج «تقديم العروض». راجعها، وأضف السعر والصور إذا ناقصة، ثم انشر.", true);
-}
 
 function resetAdd(){
   ["aType","aPrice","aCity","aDistrict","aArea","aAge","aMap","aTitle","aDesc","aVideo","aLicense"].forEach(id => $(id).value = "");
