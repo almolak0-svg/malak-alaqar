@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>تقديم العروض والطلبات — ملاك العقار</title>
+<meta name="theme-color" content="#0A5457">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=2">
+<style>
+  :root {
+    --bg: #f5f3ef;
+    --card: #ffffff;
+    --accent: #8a6d3b;
+    --accent-dark: #6b5329;
+    --text: #2b2620;
+    --muted: #7a7266;
+    --border: #e3ddd2;
+    --req: #3f6b8a;
+    --req-dark: #2c4d64;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #1c1a17;
+      --card: #262320;
+      --accent: #c9a86a;
+      --accent-dark: #e0c288;
+      --text: #f0ece3;
+      --muted: #a89d8c;
+      --border: #3a352e;
+      --req: #7ea8c4;
+      --req-dark: #a9cbe0;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #1c1a17;
+    --card: #262320;
+    --accent: #c9a86a;
+    --accent-dark: #e0c288;
+    --text: #f0ece3;
+    --muted: #a89d8c;
+    --border: #3a352e;
+    --req: #7ea8c4;
+    --req-dark: #a9cbe0;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Tahoma", "Segoe UI", Arial, sans-serif;
+    padding: 24px 16px 60px;
+  }
+  .wrap { max-width: 640px; margin: 0 auto; }
+  header { text-align: center; margin-bottom: 18px; }
+  header h1 { font-size: 24px; margin: 0 0 6px; color: var(--accent-dark); }
+  header p { margin: 0; color: var(--muted); font-size: 14px; }
+
+  .tabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 20px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 4px;
+  }
+  .tab {
+    flex: 1;
+    text-align: center;
+    padding: 10px 4px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .tab.active { background: var(--accent); color: #fff; }
+  .tab[data-tab="requestForm"].active { background: var(--req); }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 22px;
+    margin-bottom: 18px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+  }
+  .field { margin-bottom: 18px; }
+  .field:last-child { margin-bottom: 0; }
+  label { display: block; font-weight: bold; margin-bottom: 8px; font-size: 15px; }
+  input[type="text"], input[type="number"], textarea {
+    width: 100%;
+    padding: 11px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 15px;
+    font-family: inherit;
+  }
+  textarea { min-height: 90px; resize: vertical; }
+  input:focus, textarea:focus { outline: none; border-color: var(--accent); }
+
+  .property-types { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+  .ptype {
+    text-align: center; padding: 6px 2px;
+    border: 2px solid var(--border); border-radius: 8px; cursor: pointer;
+    background: var(--bg); user-select: none;
+  }
+  .ptype .icon { font-size: 15px; display:block; margin-bottom: 2px; }
+  .ptype span.label { font-size: 10px; line-height: 1.2; display: block; }
+  .ptype.selected { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 15%, var(--card)); }
+  .req-ptype.selected { border-color: var(--req); background: color-mix(in srgb, var(--req) 15%, var(--card)); }
+
+  .row2 { display: flex; gap: 12px; }
+  .row2 > div { flex: 1; }
+
+  .submit-btn {
+    width: 100%; padding: 15px; border: none; border-radius: 10px;
+    background: var(--accent); color: #fff; font-size: 17px; font-weight: bold; cursor: pointer;
+  }
+  .submit-btn:hover { background: var(--accent-dark); }
+  .submit-btn:disabled { opacity: .6; cursor: default; }
+  .req-btn { background: var(--req); }
+  .req-btn:hover { background: var(--req-dark); }
+
+  .success-msg { display: none; text-align: center; background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 30px 20px; }
+  .success-msg .check { font-size: 44px; margin-bottom: 10px; }
+  .success-msg h2 { margin: 0 0 8px; color: var(--accent-dark); }
+  .success-msg p { color: var(--muted); margin: 0; }
+
+  .dealseg { display: flex; gap: 6px; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 4px; }
+  .dealseg button { flex: 1; padding: 10px; border: none; border-radius: 8px; background: transparent; color: var(--muted); font-family: inherit; font-size: 14px; font-weight: bold; cursor: pointer; }
+  .dealseg button.on { background: var(--accent); color: #fff; }
+  .send-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .send-row a, .send-row button { flex: 1; min-width: 130px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 11px 12px; border-radius: 10px; font-family: inherit; font-size: 14px; font-weight: bold; text-decoration: none; cursor: pointer; border: none; }
+  .btn-wa { background: #1F9D55; color: #fff; }
+  .btn-malak { background: #0A5457; color: #fff; }
+  .btn-plain { background: var(--card); color: var(--text); border: 1px solid var(--border) !important; }
+  .wa-mini, .malak-mini { padding: 8px 12px; border-radius: 8px; font-size: 13px; text-decoration: none; font-family: inherit; color: #fff; display: inline-flex; align-items: center; }
+  .wa-mini { background: #1F9D55; } .malak-mini { background: #0A5457; }
+  .card-actions { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+  .section-title { font-size: 13px; color: var(--muted); margin: 0 0 12px; font-weight: bold; }
+
+  /* list view */
+  .filter-row { display: flex; gap: 8px; margin-bottom: 14px; }
+  .filter-btn {
+    flex: 1; text-align: center; padding: 8px; border-radius: 8px; font-size: 13px;
+    border: 1px solid var(--border); background: var(--card); color: var(--muted); cursor: pointer;
+  }
+  .filter-btn.active { background: var(--text); color: var(--card); border-color: var(--text); }
+
+  .offer-card { display: flex; flex-direction: column; gap: 10px; }
+  .offer-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  .offer-type { font-weight: bold; font-size: 16px; color: var(--accent-dark); }
+  .badge {
+    display: inline-block; font-size: 11px; font-weight: bold; padding: 3px 9px;
+    border-radius: 20px; margin-inline-end: 6px; color: #fff; background: var(--accent);
+  }
+  .badge.req { background: var(--req); }
+  .offer-date { font-size: 12px; color: var(--muted); }
+  .offer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 16px; font-size: 14px; }
+  .offer-grid .k { color: var(--muted); }
+  .empty-state { text-align: center; color: var(--muted); padding: 40px 10px; }
+  .status-note { font-size: 12px; color: var(--muted); text-align: center; margin-top: 10px; }
+
+  .copy-one-btn {
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--accent-dark);
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .copy-one-btn:hover { border-color: var(--accent); }
+  .copy-one-btn.copied { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .delete-btn {
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: #b23b3b;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .delete-btn:hover { border-color: #b23b3b; background: color-mix(in srgb, #b23b3b 10%, var(--card)); }
+  .delete-btn.armed { background: #b23b3b; color: #fff; border-color: #b23b3b; }
+  .delete-btn:disabled { opacity: .5; cursor: default; }
+  .card-actions { display: flex; flex-direction: column; gap: 6px; align-items: stretch; }
+  .offer-head-right { display: flex; align-items: flex-start; gap: 10px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <a href="./" style="display:inline-block;margin-bottom:8px"><img src="logo.jpg?v=2" alt="ملاك العقار" style="width:120px;height:86px;object-fit:cover;border-radius:14px;border:2px solid #C9A267"></a>
+    <h1>تقديم العروض والطلبات</h1>
+    <p>قدّم عرض عقار، أو قدّم طلب بحث عن عقار، وراجع كل ما تم استلامه</p>
+  </header>
+
+  <div class="tabs">
+    <div class="tab active" data-tab="offerForm">تقديم عرض</div>
+    <div class="tab" data-tab="requestForm">تقديم طلب</div>
+    <div class="tab" data-tab="list">المستلمة</div>
+  </div>
+
+  <!-- ===== OFFER FORM ===== -->
+  <div id="offerFormView">
+    <form id="offerForm">
+      <div class="card">
+        <div class="field">
+          <label>نوع العقار</label>
+          <div class="property-types" id="ptypes">
+            <div class="ptype" data-value="شقة"><span class="icon">🏠</span><span class="label">شقة</span></div>
+            <div class="ptype" data-value="فيلا"><span class="icon">🏡</span><span class="label">فيلا</span></div>
+            <div class="ptype" data-value="دور"><span class="icon">🏘️</span><span class="label">دور</span></div>
+            <div class="ptype" data-value="روف"><span class="icon">🔝</span><span class="label">روف</span></div>
+            <div class="ptype" data-value="عمارة سكنية"><span class="icon">🏢</span><span class="label">عمارة سكنية</span></div>
+            <div class="ptype" data-value="عمارة تجارية"><span class="icon">🏬</span><span class="label">عمارة تجارية</span></div>
+            <div class="ptype" data-value="مجمع تجاري"><span class="icon">🛍️</span><span class="label">مجمع تجاري</span></div>
+            <div class="ptype" data-value="محل"><span class="icon">🏪</span><span class="label">محل</span></div>
+            <div class="ptype" data-value="أرض سكنية"><span class="icon">🏞️</span><span class="label">أرض سكنية</span></div>
+            <div class="ptype" data-value="أرض تجارية"><span class="icon">📐</span><span class="label">أرض تجارية</span></div>
+            <div class="ptype" data-value="استراحة"><span class="icon">⛺</span><span class="label">استراحة</span></div>
+            <div class="ptype" data-value="مزرعة"><span class="icon">🚜</span><span class="label">مزرعة</span></div>
+            <div class="ptype" data-value="فندق"><span class="icon">🏨</span><span class="label">فندق</span></div>
+            <div class="ptype" data-value="محطة وقود"><span class="icon">⛽</span><span class="label">محطة وقود</span></div>
+            <div class="ptype" data-value="مستودع"><span class="icon">📦</span><span class="label">مستودع</span></div>
+            <div class="ptype" data-value="أخرى"><span class="icon">➕</span><span class="label">أخرى</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <p class="section-title">تفاصيل العقار</p>
+        <div class="field">
+          <label>نوع العرض</label>
+          <div class="dealseg" id="dealSeg"><button type="button" data-deal="sale" class="on">للبيع</button><button type="button" data-deal="rent">للإيجار</button></div>
+        </div>
+        <div class="field">
+          <label for="price" id="priceLbl">السعر (ريال)</label>
+          <input type="text" id="price" name="price" inputmode="numeric" placeholder="مثال: 850000">
+        </div>
+        <div class="field">
+          <label for="area">المساحة (م²)</label>
+          <input type="text" id="area" name="area" placeholder="مثال: 2500 م²">
+        </div>
+        <div class="field">
+          <label for="specs">المواصفات</label>
+          <textarea id="specs" name="specs" placeholder="اذكر المواصفات التفصيلية للعقار (عدد الأدوار، عدد الوحدات، التشطيبات، المرافق...)"></textarea>
+        </div>
+        <div class="row2">
+          <div class="field">
+            <label for="age">عمر العقار (سنة)</label>
+            <input type="text" id="age" name="age" placeholder="مثال: 5 سنوات">
+          </div>
+          <div class="field">
+            <label for="income">الدخل السنوي (ريال)</label>
+            <input type="text" id="income" name="income" placeholder="مثال: 500000 ريال">
+          </div>
+        </div>
+        <div class="row2">
+          <div class="field">
+            <label for="city">المدينة</label>
+            <input type="text" id="city" name="city" placeholder="مثال: الرياض">
+          </div>
+          <div class="field">
+            <label for="district">الحي</label>
+            <input type="text" id="district" name="district" placeholder="مثال: حي النرجس">
+          </div>
+        </div>
+        <div class="row2">
+          <div class="field">
+            <label for="rooms">الغرف</label>
+            <input type="text" id="rooms" name="rooms" inputmode="numeric" placeholder="0">
+          </div>
+          <div class="field">
+            <label for="baths">دورات المياه</label>
+            <input type="text" id="baths" name="baths" inputmode="numeric" placeholder="0">
+          </div>
+        </div>
+        <div class="field">
+          <label for="location">الموقع</label>
+          <input type="text" id="location" name="location" placeholder="قوقل ماب">
+        </div>
+      </div>
+
+      <button type="submit" class="submit-btn" id="submitBtn">إرسال العرض</button>
+      <p class="status-note" id="statusNote"></p>
+    </form>
+
+    <div class="success-msg" id="successMsg">
+      <div class="check">✅</div>
+      <h2>تم حفظ العرض بنجاح</h2>
+      <p>تم تخزين بيانات العقار، ويمكنك مراجعته من تبويب "المستلمة".</p>
+      <div class="send-row" style="margin-top:16px">
+        <a class="btn-malak" id="okMalak" href="#" >انقل لملاك العقار</a>
+        <a class="btn-wa" id="okWa" href="#" target="_blank" rel="noopener">إرسال واتساب</a>
+      </div>
+      <div class="send-row" style="margin-top:8px"><button type="button" class="btn-plain" id="okNew">تقديم عرض جديد</button></div>
+    </div>
+  </div>
+
+  <!-- ===== REQUEST FORM ===== -->
+  <div id="requestFormView" style="display:none;">
+    <form id="requestForm">
+      <div class="card">
+        <div class="field">
+          <label>نوع العقار المطلوب</label>
+          <div class="property-types" id="rptypes">
+            <div class="ptype req-ptype" data-value="شقة"><span class="icon">🏠</span><span class="label">شقة</span></div>
+            <div class="ptype req-ptype" data-value="فيلا"><span class="icon">🏡</span><span class="label">فيلا</span></div>
+            <div class="ptype req-ptype" data-value="دور"><span class="icon">🏘️</span><span class="label">دور</span></div>
+            <div class="ptype req-ptype" data-value="روف"><span class="icon">🔝</span><span class="label">روف</span></div>
+            <div class="ptype req-ptype" data-value="عمارة سكنية"><span class="icon">🏢</span><span class="label">عمارة سكنية</span></div>
+            <div class="ptype req-ptype" data-value="عمارة تجارية"><span class="icon">🏬</span><span class="label">عمارة تجارية</span></div>
+            <div class="ptype req-ptype" data-value="مجمع تجاري"><span class="icon">🛍️</span><span class="label">مجمع تجاري</span></div>
+            <div class="ptype req-ptype" data-value="محل"><span class="icon">🏪</span><span class="label">محل</span></div>
+            <div class="ptype req-ptype" data-value="أرض سكنية"><span class="icon">🏞️</span><span class="label">أرض سكنية</span></div>
+            <div class="ptype req-ptype" data-value="أرض تجارية"><span class="icon">📐</span><span class="label">أرض تجارية</span></div>
+            <div class="ptype req-ptype" data-value="استراحة"><span class="icon">⛺</span><span class="label">استراحة</span></div>
+            <div class="ptype req-ptype" data-value="مزرعة"><span class="icon">🚜</span><span class="label">مزرعة</span></div>
+            <div class="ptype req-ptype" data-value="فندق"><span class="icon">🏨</span><span class="label">فندق</span></div>
+            <div class="ptype req-ptype" data-value="محطة وقود"><span class="icon">⛽</span><span class="label">محطة وقود</span></div>
+            <div class="ptype req-ptype" data-value="مستودع"><span class="icon">📦</span><span class="label">مستودع</span></div>
+            <div class="ptype req-ptype" data-value="أخرى"><span class="icon">➕</span><span class="label">أخرى</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <p class="section-title">تفاصيل الطلب</p>
+        <div class="field">
+          <label for="rArea">المساحة المطلوبة (م²)</label>
+          <input type="text" id="rArea" name="rArea" placeholder="مثال: 2500 م²">
+        </div>
+        <div class="field">
+          <label for="rSpecs">المواصفات المطلوبة</label>
+          <textarea id="rSpecs" name="rSpecs" placeholder="اذكر المواصفات المطلوبة في العقار"></textarea>
+        </div>
+        <div class="row2">
+          <div class="field">
+            <label for="rBudget">الميزانية المتوقعة (ريال)</label>
+            <input type="text" id="rBudget" name="rBudget" placeholder="مثال: 3000000 ريال">
+          </div>
+          <div class="field">
+            <label for="rIncome">الدخل السنوي المستهدف (ريال)</label>
+            <input type="text" id="rIncome" name="rIncome" placeholder="مثال: 500000 ريال">
+          </div>
+        </div>
+        <div class="field">
+          <label for="rCityDistrict">المدينة والحي</label>
+          <input type="text" id="rCityDistrict" name="rCityDistrict" placeholder="مثال: الرياض - حي النرجس">
+        </div>
+        <div class="field">
+          <label for="rLocation">الموقع المفضل</label>
+          <input type="text" id="rLocation" name="rLocation" placeholder="قوقل ماب">
+        </div>
+      </div>
+
+      <button type="submit" class="submit-btn req-btn" id="requestSubmitBtn">إرسال الطلب</button>
+      <p class="status-note" id="requestStatusNote"></p>
+    </form>
+
+    <div class="success-msg" id="requestSuccessMsg">
+      <div class="check">✅</div>
+      <h2>تم حفظ الطلب بنجاح</h2>
+      <p>تم تخزين طلبك، ويمكن مراجعته من تبويب "المستلمة".</p>
+      <div class="send-row" style="margin-top:16px">
+        <a class="btn-wa" id="rOkWa" href="#" target="_blank" rel="noopener">إرسال واتساب</a>
+        <button type="button" class="btn-plain" id="rOkNew">تقديم طلب جديد</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== LIST VIEW ===== -->
+  <div id="listView" style="display:none;">
+    <div class="filter-row">
+      <div class="filter-btn active" data-filter="all">الكل</div>
+      <div class="filter-btn" data-filter="offer">العروض</div>
+      <div class="filter-btn" data-filter="request">الطلبات</div>
+    </div>
+    <div id="offersList"></div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/13.1.0/firebase-auth.js";
+import { getFirestore, collection, query, orderBy, limit, getDocs, getDoc, addDoc, deleteDoc, doc, serverTimestamp }
+  from "https://www.gstatic.com/firebasejs/13.1.0/firebase-firestore.js";
+const firebaseConfig = {
+  apiKey: "AIzaSyD0AQcVv-CeK4Q4kq5qgDVh_qNNX7A_KhI",
+  authDomain: "malak-alaqar.firebaseapp.com",
+  projectId: "malak-alaqar",
+  storageBucket: "malak-alaqar.firebasestorage.app",
+  messagingSenderId: "1034402733452",
+  appId: "1:1034402733452:web:1a942c428619988ed3caa9"
+};
+const fbApp = initializeApp(firebaseConfig);
+const auth = getAuth(fbApp), fs = getFirestore(fbApp);
+const authReady = new Promise(res => { const u = onAuthStateChanged(auth, (x) => { u(); res(x); }); });
+const COL = "submissions";
+(async function () {
+  // طبقة قاعدة البيانات: نفس طريقة النموذج القديم لكن على Firebase حق ملاك العقار
+  const db = {
+    collection(){ return {
+      add: (d) => addDoc(collection(fs, COL), { ...d, createdAt: serverTimestamp() }),
+      orderBy(){ return { limit(){ return { get: async () => {
+        const user = await authReady;
+        if (!user || !(await getDoc(doc(fs, "admins", user.uid))).exists()) throw new Error("not-admin");
+        const snap = await getDocs(query(collection(fs, COL), orderBy("createdAt", "desc"), limit(200)));
+        return { docs: snap.docs.map(x => ({ id: x.id, data: () => { const v = x.data(); return { ...v, createdAt: v.createdAt?.toMillis ? v.createdAt.toMillis() : Date.now() }; } })) };
+      } }; } }; },
+      doc: (id) => ({ delete: () => deleteDoc(doc(fs, COL, id)) })
+    }; }
+  };
+
+  // ---- الربط مع ملاك العقار + واتساب ----
+  const MALAK_URL = "./#add?d=";
+  const TYPE_MAP = { "أرض": "أرض سكنية", "عمارة": "عمارة سكنية" };
+  const num = (v) => String(v || "").replace(/[٠-٩]/g, d => "٠١٢٣٤٥٦٧٨٩".indexOf(d)).replace(/[^\d.]/g, "");
+  function splitCD(o){
+    if (o.city || o.district) return [o.city || "", o.district || ""];
+    const parts = String(o.cityDistrict || "").split(/\s*[-–،,]\s*/);
+    return [parts[0] || "", parts.slice(1).join(" ") || ""];
+  }
+  function malakLink(o){
+    const [c, n] = splitCD(o);
+    const d = { t: TYPE_MAP[o.propertyType] || o.propertyType || "", d: o.deal || "sale", p: num(o.price), a: num(o.area), g: num(o.age),
+      c, n, m: /^https?:\/\//i.test(o.location || "") ? o.location : "", s: o.specs || "", i: num(o.income), r: num(o.rooms), b: num(o.baths) };
+    const json = JSON.stringify(d);
+    const b64 = btoa(unescape(encodeURIComponent(json))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+    return MALAK_URL + b64;
+  }
+  const waLink = (text) => "https://wa.me/?text=" + encodeURIComponent(text);
+  let deal = "sale";
+  document.getElementById("dealSeg").addEventListener("click", (e) => {
+    const b = e.target.closest("button"); if (!b) return;
+    deal = b.dataset.deal;
+    document.querySelectorAll("#dealSeg button").forEach(x => x.classList.toggle("on", x === b));
+    document.getElementById("priceLbl").textContent = deal === "rent" ? "الإيجار السنوي (ريال)" : "السعر (ريال)";
+  });
+
+  // ---- tabs ----
+  const tabs = document.querySelectorAll(".tab");
+  const offerFormView = document.getElementById("offerFormView");
+  const requestFormView = document.getElementById("requestFormView");
+  const listView = document.getElementById("listView");
+  const views = { offerForm: offerFormView, requestForm: requestFormView, list: listView };
+
+  tabs.forEach(t => {
+    t.addEventListener("click", () => {
+      tabs.forEach(x => x.classList.remove("active"));
+      t.classList.add("active");
+      Object.entries(views).forEach(([key, el]) => {
+        el.style.display = key === t.dataset.tab ? "" : "none";
+      });
+      if (t.dataset.tab === "list") loadItems();
+    });
+  });
+
+  // ---- offer: property type selection ----
+  const ptypes = document.querySelectorAll("#ptypes .ptype");
+  let selectedType = null;
+  ptypes.forEach(el => {
+    el.addEventListener("click", () => {
+      ptypes.forEach(p => p.classList.remove("selected"));
+      el.classList.add("selected");
+      selectedType = el.dataset.value;
+    });
+  });
+
+  // ---- request: property type selection ----
+  const rptypes = document.querySelectorAll("#rptypes .ptype");
+  let rSelectedType = null;
+  rptypes.forEach(el => {
+    el.addEventListener("click", () => {
+      rptypes.forEach(p => p.classList.remove("selected"));
+      el.classList.add("selected");
+      rSelectedType = el.dataset.value;
+    });
+  });
+
+  // ---- submit offer ----
+  const offerForm = document.getElementById("offerForm");
+  const submitBtn = document.getElementById("submitBtn");
+  const statusNote = document.getElementById("statusNote");
+
+  offerForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    if (!selectedType) {
+      statusNote.textContent = "يرجى اختيار نوع العقار قبل الإرسال";
+      return;
+    }
+    if (!db) {
+      statusNote.textContent = "تعذر الوصول لقاعدة البيانات في هذه المعاينة. افتح الصفحة المنشورة لاستخدام الحفظ.";
+      return;
+    }
+
+    submitBtn.disabled = true;
+    statusNote.textContent = "جارٍ الحفظ...";
+
+    try {
+      const data = {
+        kind: "offer",
+        propertyType: selectedType,
+        deal,
+        price: document.getElementById("price").value || null,
+        city: document.getElementById("city").value || "",
+        district: document.getElementById("district").value || "",
+        rooms: document.getElementById("rooms").value || null,
+        baths: document.getElementById("baths").value || null,
+        area: document.getElementById("area").value || null,
+        specs: document.getElementById("specs").value || "",
+        age: document.getElementById("age").value || null,
+        income: document.getElementById("income").value || null,
+        cityDistrict: [document.getElementById("city").value, document.getElementById("district").value].filter(Boolean).join(" - "),
+        location: document.getElementById("location").value || "",
+        createdAt: Date.now()
+      };
+
+      await db.collection("offers").add(data);
+
+      document.getElementById("okMalak").href = malakLink(data);
+      document.getElementById("okWa").href = waLink(itemToText(data, new Date().toLocaleString("ar-SA")));
+      offerForm.style.display = "none";
+      document.getElementById("successMsg").style.display = "block";
+    } catch (err) {
+      console.error(err);
+      statusNote.textContent = "حدث خطأ أثناء الحفظ. حاول مرة أخرى.";
+    } finally {
+      submitBtn.disabled = false;
+    }
+  });
+
+  // ---- submit request ----
+  const requestForm = document.getElementById("requestForm");
+  const requestSubmitBtn = document.getElementById("requestSubmitBtn");
+  const requestStatusNote = document.getElementById("requestStatusNote");
+
+  requestForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    if (!rSelectedType) {
+      requestStatusNote.textContent = "يرجى اختيار نوع العقار المطلوب قبل الإرسال";
+      return;
+    }
+    if (!db) {
+      requestStatusNote.textContent = "تعذر الوصول لقاعدة البيانات في هذه المعاينة. افتح الصفحة المنشورة لاستخدام الحفظ.";
+      return;
+    }
+
+    requestSubmitBtn.disabled = true;
+    requestStatusNote.textContent = "جارٍ الحفظ...";
+
+    try {
+      const data = {
+        kind: "request",
+        propertyType: rSelectedType,
+        area: document.getElementById("rArea").value || null,
+        specs: document.getElementById("rSpecs").value || "",
+        budget: document.getElementById("rBudget").value || null,
+        income: document.getElementById("rIncome").value || null,
+        cityDistrict: document.getElementById("rCityDistrict").value || "",
+        location: document.getElementById("rLocation").value || "",
+        createdAt: Date.now()
+      };
+
+      await db.collection("offers").add(data);
+
+      document.getElementById("rOkWa").href = waLink(itemToText(data, new Date().toLocaleString("ar-SA")));
+      requestForm.style.display = "none";
+      document.getElementById("requestSuccessMsg").style.display = "block";
+    } catch (err) {
+      console.error(err);
+      requestStatusNote.textContent = "حدث خطأ أثناء الحفظ. حاول مرة أخرى.";
+    } finally {
+      requestSubmitBtn.disabled = false;
+    }
+  });
+
+  document.getElementById("okNew").addEventListener("click", () => {
+    offerForm.reset(); selectedType = null; ptypes.forEach(p => p.classList.remove("selected"));
+    document.getElementById("successMsg").style.display = "none"; offerForm.style.display = ""; statusNote.textContent = ""; window.scrollTo(0, 0);
+  });
+  document.getElementById("rOkNew").addEventListener("click", () => {
+    requestForm.reset(); rSelectedType = null; rptypes.forEach(p => p.classList.remove("selected"));
+    document.getElementById("requestSuccessMsg").style.display = "none"; requestForm.style.display = ""; requestStatusNote.textContent = ""; window.scrollTo(0, 0);
+  });
+
+  // ---- list view ----
+  const offersList = document.getElementById("offersList");
+  const filterBtns = document.querySelectorAll(".filter-btn");
+  let currentFilter = "all";
+  let cachedDocs = [];
+
+  filterBtns.forEach(btn => {
+    btn.addEventListener("click", () => {
+      filterBtns.forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      currentFilter = btn.dataset.filter;
+      renderList();
+    });
+  });
+
+  function itemToText(o, date) {
+    const isReq = o.kind === "request";
+    const lines = [
+      `النوع: ${isReq ? "طلب" : "عرض"}`,
+      `نوع العقار: ${o.propertyType || "-"}${isReq ? "" : (o.deal === "rent" ? " (للإيجار)" : " (للبيع)")}`,
+      `المساحة: ${o.area || "-"} م²`,
+    ];
+    if (isReq) {
+      lines.push(`الميزانية المتوقعة: ${o.budget || "-"}`);
+    } else {
+      lines.push(`${o.deal === "rent" ? "الإيجار السنوي" : "السعر"}: ${o.price || "-"} ريال`);
+      lines.push(`عمر العقار: ${o.age || "-"} سنة`);
+      if (o.rooms || o.baths) lines.push(`الغرف: ${o.rooms || "-"} · دورات المياه: ${o.baths || "-"}`);
+    }
+    lines.push(`الدخل السنوي: ${o.income || "-"}`);
+    lines.push(`المدينة والحي: ${o.cityDistrict || "-"}`);
+    lines.push(`الموقع: ${o.location || "-"}`);
+    lines.push(`المواصفات: ${o.specs || "-"}`);
+    lines.push(`تاريخ التقديم: ${date || "-"}`);
+    return lines.join("\n");
+  }
+
+  async function copyText(text, btn) {
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(text);
+      } else {
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        ta.style.position = "fixed";
+        ta.style.opacity = "0";
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+      }
+      if (btn) {
+        const original = btn.textContent;
+        btn.textContent = "✅ تم النسخ";
+        btn.classList.add("copied");
+        setTimeout(() => {
+          btn.textContent = original;
+          btn.classList.remove("copied");
+        }, 1500);
+      }
+    } catch (err) {
+      console.error("copy failed", err);
+      if (btn) {
+        btn.textContent = "تعذر النسخ";
+        setTimeout(() => { btn.textContent = "📋 نسخ"; }, 1500);
+      }
+    }
+  }
+
+  async function loadItems() {
+    if (!db) {
+      offersList.innerHTML = '<div class="empty-state">تعذر الوصول لقاعدة البيانات في هذه المعاينة.<br>افتح الصفحة المنشورة لعرض ما تم استلامه.</div>';
+      return;
+    }
+    offersList.innerHTML = '<div class="empty-state">جارٍ التحميل...</div>';
+    try {
+      const snap = await db.collection("offers").orderBy("createdAt", "desc").limit(200).get();
+      cachedDocs = snap.docs || [];
+      renderList();
+    } catch (err) {
+      console.error(err);
+      offersList.innerHTML = err.message === "not-admin"
+        ? '<div class="empty-state">المستلمة تظهر للإدارة فقط.<br><a href="./#login">سجّل دخولك في ملاك العقار بحساب الإدارة</a> ثم ارجع لهذي الصفحة.</div>'
+        : '<div class="empty-state">حدث خطأ أثناء تحميل البيانات. تأكد إنك حدّثت قواعد Firestore.</div>';
+    }
+  }
+
+  function renderList() {
+    const filtered = cachedDocs.filter(d => {
+      if (currentFilter === "all") return true;
+      const o = d.data();
+      return o.kind === currentFilter;
+    });
+
+    if (!filtered.length) {
+      offersList.innerHTML = '<div class="empty-state">لا توجد بيانات في هذا التصنيف حتى الآن.</div>';
+      return;
+    }
+
+    offersList.innerHTML = "";
+    filtered.forEach(d => {
+      const o = d.data();
+      const isReq = o.kind === "request";
+      const date = o.createdAt ? new Date(o.createdAt).toLocaleString("ar-SA") : "";
+      const div = document.createElement("div");
+      div.className = "card offer-card";
+      div.innerHTML = `
+        <div class="offer-head">
+          <span>
+            <span class="badge ${isReq ? "req" : ""}">${isReq ? "طلب" : "عرض"}</span>
+            <span class="offer-type">${escapeHtml(o.propertyType || "-")}</span>
+          </span>
+          <div class="offer-head-right">
+            <span class="offer-date">${date}</span>
+            <div class="card-actions">
+              <button type="button" class="copy-one-btn">📋 نسخ</button>
+              <a class="wa-mini" href="${waLink(itemToText(o, date))}" target="_blank" rel="noopener">واتساب</a>
+              ${isReq ? "" : `<a class="malak-mini" href="${malakLink(o)}">ملاك العقار</a>`}
+              <button type="button" class="delete-btn">🗑 حذف</button>
+            </div>
+          </div>
+        </div>
+        <div class="offer-grid">
+          ${isReq ? "" : `<div><span class="k">${o.deal === "rent" ? "الإيجار:" : "السعر:"}</span> ${escapeHtml(o.price || "-")}</div>`}
+          <div><span class="k">المساحة:</span> ${escapeHtml(o.area || "-")} م²</div>
+          <div><span class="k">${isReq ? "الميزانية:" : "عمر العقار:"}</span> ${escapeHtml(isReq ? (o.budget || "-") : (o.age || "-")) }${isReq ? "" : " سنة"}</div>
+          <div><span class="k">الدخل السنوي:</span> ${escapeHtml(o.income || "-")}</div>
+          <div><span class="k">المدينة والحي:</span> ${escapeHtml(o.cityDistrict || "-")}</div>
+          <div><span class="k">الموقع:</span> ${o.location ? (/^https?:\/\//i.test(o.location) ? `<a href="${escapeHtml(o.location)}" target="_blank" rel="noopener">📍 فتح في خرائط جوجل</a>` : escapeHtml(o.location)) : "-"}</div>
+        </div>
+        ${o.specs ? `<div><span class="k">المواصفات:</span> ${escapeHtml(o.specs)}</div>` : ""}
+      `;
+      const copyBtn = div.querySelector(".copy-one-btn");
+      copyBtn.addEventListener("click", () => copyText(itemToText(o, date), copyBtn));
+
+      const deleteBtn = div.querySelector(".delete-btn");
+      let deleteArmed = false;
+      let armTimeout = null;
+      deleteBtn.addEventListener("click", async () => {
+        if (!deleteArmed) {
+          deleteArmed = true;
+          deleteBtn.textContent = "تأكيد الحذف؟";
+          deleteBtn.classList.add("armed");
+          armTimeout = setTimeout(() => {
+            deleteArmed = false;
+            deleteBtn.textContent = "🗑 حذف";
+            deleteBtn.classList.remove("armed");
+          }, 3000);
+          return;
+        }
+        clearTimeout(armTimeout);
+        deleteBtn.disabled = true;
+        deleteBtn.textContent = "جارٍ الحذف...";
+        try {
+          await db.collection("offers").doc(d.id).delete();
+          cachedDocs = cachedDocs.filter(x => x.id !== d.id);
+          renderList();
+        } catch (err) {
+          console.error("delete failed", err);
+          deleteArmed = false;
+          deleteBtn.disabled = false;
+          deleteBtn.classList.remove("armed");
+          deleteBtn.textContent = "تعذر الحذف";
+          setTimeout(() => { deleteBtn.textContent = "🗑 حذف"; }, 2000);
+        }
+      });
+
+      offersList.appendChild(div);
+    });
+  }
+
+  function escapeHtml(str) {
+    return String(str).replace(/[&<>"']/g, m => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m]));
+  }
+})();
+</script>
+</body>
+</html>
